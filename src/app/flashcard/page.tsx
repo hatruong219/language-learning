@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import { FlashCardDeck } from '@/components/flashcard/FlashCardDeck'
+import { FlashCardSetup } from '@/components/flashcard/FlashCardSetup'
+import type { Vocabulary } from '@/types/database'
 
 
 export const metadata = {
@@ -9,13 +10,31 @@ export const metadata = {
 export default async function FlashCardAllPage() {
   const supabase = await createClient()
 
-  const { data } = await supabase
+  // Để tránh giới hạn 1000 rows mặc định của Supabase,
+  // fetch theo từng cấp JLPT (mỗi cấp < 1000) rồi gộp lại.
+  const levels = ['N5', 'N4', 'N3', 'N2', 'N1'] as const
+
+  const levelPromises = levels.map((level) =>
+    supabase
+      .from('vocabulary')
+      .select('*')
+      .eq('is_active', true)
+      .eq('jlpt_level', level)
+      .order('order_index'),
+  )
+
+  const otherPromise = supabase
     .from('vocabulary')
     .select('*')
     .eq('is_active', true)
+    .is('jlpt_level', null)
     .order('order_index')
 
-  const cards = data ?? []
+  const results = await Promise.all([...levelPromises, otherPromise])
+
+  const allCards: Vocabulary[] = results.flatMap((res) => (res.data ?? [])) as Vocabulary[]
+
+  const cards = allCards
 
   if (cards.length === 0) {
     return (
@@ -29,7 +48,7 @@ export default async function FlashCardAllPage() {
   }
 
   return (
-    <FlashCardDeck
+    <FlashCardSetup
       cards={cards}
       deckName="Tất cả từ vựng"
       backHref="/decks"

@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 日本語を学ぼう — Language Learning App
 
-## Getting Started
+Ứng dụng web giúp học tiếng Nhật (và có thể mở rộng thêm ngôn ngữ khác sau này) với từ vựng, flashcard, bảng chữ cái và JLPT filter rõ ràng.
 
-First, run the development server:
+### 🔧 Tech stack
+- **Frontend**: `Next.js 14+ (App Router)`, `TypeScript (strict)`, `Tailwind CSS v4`, `shadcn/ui`, `framer-motion`
+- **Backend / Data**: `Supabase` (PostgreSQL, Auth trong tương lai)
+- **Khác**: Web Speech API (Text‑to‑Speech), CSS animations
+
+---
+
+### ✨ Tính năng chính
+- **Từ vựng**  
+  - Danh sách tất cả từ vựng, filter theo **deck / chủ đề**, **JLPT (N5 → N1)**, và search.  
+  - Thẻ từ hiển thị chữ Nhật, furigana, romaji, nghĩa tiếng Việt, badge JLPT, nút nghe TTS.
+
+- **Flashcard**  
+  - Học **toàn bộ từ vựng** hoặc theo từng deck: `/flashcard`, `/flashcard/[slug]`.  
+  - Chọn số lượng thẻ (10 / 20 / 30 / 50 / tất cả / tùy chỉnh) và **lọc theo nhiều cấp độ JLPT cùng lúc**.  
+  - Giao diện flashcard có hiệu ứng lật, auto‑play TTS khi lật sang mặt sau, phím tắt (Space / ← / ↓ / →), thống kê sau khi học xong.
+
+- **Chủ đề (Decks)**  
+  - Trang `/decks` hiển thị các deck với emoji, mô tả ngắn, số lượng từ.  
+  - Mỗi deck có trang chi tiết và nút “Học flashcard”.
+
+- **Bảng chữ cái**  
+  - Trang `/alphabet` hiển thị **hiragana** và **katakana** theo hàng A / K / S / T / N / H / M / Y / R / W.  
+  - Mỗi ô chữ có romaji, click để phát âm, icon loa nhấp nháy khi đang đọc.
+
+---
+
+### 🖼 Screenshots
+
+> Gợi ý: lưu screenshot vào `public/screens/` rồi update đường dẫn bên dưới cho khớp.
+
+- **Trang Flashcard — chọn số lượng & JLPT**
+  
+  `![Flashcard setup](public/screens/flashcard-setup.png)`
+
+- **Bảng chữ cái Hiragana/Katakana**
+  
+  `![Alphabet chart](public/screens/alphabet.png)`
+
+- **Danh sách từ vựng**
+  
+  `![Vocabulary list](public/screens/vocabulary-list.png)`
+
+---
+
+### 🚀 Chạy local
+
+Yêu cầu: Node.js LTS, `pnpm`.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.local.example .env.local  # điền các env bên dưới
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ứng dụng chạy tại `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 🔐 Biến môi trường
 
-## Learn More
+File `.env.local`:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_SITE_ID=  # UUID của site trong bảng sites
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 🗄 Cấu trúc & Database (tóm tắt)
 
-## Deploy on Vercel
+- `src/app/` — App Router pages (`/`, `/vocabulary`, `/decks`, `/flashcard`, `/alphabet`, …)  
+- `src/components/` — UI components (PascalCase.tsx)  
+- `src/lib/supabase/` — client/server helpers cho Supabase  
+- `src/lib/tts.ts` — wrapper Web Speech API  
+- `src/types/database.ts` — type cho các bảng Supabase  
+- `supabase/migrations/` — file SQL migration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Các bảng chính:
+- `decks` — chủ đề học tập  
+- `vocabulary` — từ vựng (gồm `jlpt_level`, `deck_id`, …)  
+- `vocabulary_examples` — câu ví dụ  
+- `alphabet_characters` — bảng chữ cái  
+- (Phase 2) `user_progress`, `study_sessions` cho tracking tiến độ
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+### 📌 Roadmap ngắn
+- Seed đủ bộ từ JLPT N5–N4 (~800–1500 từ).  
+- Thêm **Quiz mode** (`/quiz`) với multiple‑choice.  
+- Lưu **tiến độ học** theo user, spaced repetition.
+

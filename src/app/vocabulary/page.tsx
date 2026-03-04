@@ -79,20 +79,65 @@ export default async function VocabularyPage({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-8">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+        <div className="flex justify-center items-center gap-1 mt-8 flex-wrap">
+          {/* Prev */}
+          {page > 1 && (
             <a
-              key={p}
-              href={`?${new URLSearchParams({ ...params, page: String(p) })}`}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium border transition-colors ${
-                p === page
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'border-border hover:bg-accent'
-              }`}
+              href={`?${new URLSearchParams({ ...params, page: String(page - 1) })}`}
+              className="px-3 py-1.5 rounded-md text-sm font-medium border border-border hover:bg-accent transition-colors"
             >
-              {p}
+              ←
             </a>
-          ))}
+          )}
+
+          {/* Page numbers with windowing */}
+          {(() => {
+            const delta = 2
+            const range: (number | 'ellipsis')[] = []
+            const left = Math.max(2, page - delta)
+            const right = Math.min(totalPages - 1, page + delta)
+
+            // Always show first page
+            range.push(1)
+
+            if (left > 2) range.push('ellipsis')
+
+            for (let i = left; i <= right; i++) range.push(i)
+
+            if (right < totalPages - 1) range.push('ellipsis')
+
+            // Always show last page
+            if (totalPages > 1) range.push(totalPages)
+
+            return range.map((item, idx) =>
+              item === 'ellipsis' ? (
+                <span key={`ellipsis-${idx}`} className="px-2 py-1.5 text-sm text-muted-foreground">
+                  …
+                </span>
+              ) : (
+                <a
+                  key={item}
+                  href={`?${new URLSearchParams({ ...params, page: String(item) })}`}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium border transition-colors ${item === page
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'border-border hover:bg-accent'
+                    }`}
+                >
+                  {item}
+                </a>
+              )
+            )
+          })()}
+
+          {/* Next */}
+          {page < totalPages && (
+            <a
+              href={`?${new URLSearchParams({ ...params, page: String(page + 1) })}`}
+              className="px-3 py-1.5 rounded-md text-sm font-medium border border-border hover:bg-accent transition-colors"
+            >
+              →
+            </a>
+          )}
         </div>
       )}
     </div>
