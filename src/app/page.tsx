@@ -7,22 +7,52 @@ import { Zap, BookOpen, Grid3x3 } from 'lucide-react'
 import type { DeckWithCount, VocabularyWithDeck } from '@/types/database'
 
 
+function pickDailyRandom<T>(items: T[], count: number): T[] {
+  if (items.length <= count) return items
+
+  // Seed theo ngày (YYYY-MM-DD) để "ngẫu nhiên hôm nay" nhưng ổn định trong ngày
+  const today = new Date().toISOString().slice(0, 10)
+  let seed = 0
+  for (let i = 0; i < today.length; i++) {
+    seed = (seed * 31 + today.charCodeAt(i)) >>> 0
+  }
+
+  function nextRandom() {
+    // simple LCG
+    seed = (seed * 1664525 + 1013904223) >>> 0
+    return seed / 0xffffffff
+  }
+
+  const indices = new Set<number>()
+  while (indices.size < count) {
+    const idx = Math.floor(nextRandom() * items.length)
+    indices.add(idx)
+  }
+
+  return Array.from(indices).map((i) => items[i])
+}
+
+export const revalidate = 60
+
 export default async function HomePage() {
   const supabase = await createClient()
 
   const [decksRes, wordsRes, statsRes] = await Promise.all([
     supabase
       .from('decks')
-      .select('*, vocabulary_count:vocabulary(count)')
+      .select('id, name, slug, emoji, description, order_index, is_public, vocabulary_count:vocabulary(count)')
       .eq('is_public', true)
       .order('order_index')
       .limit(6),
 
     supabase
       .from('vocabulary')
-      .select('*, deck:decks(name, slug, emoji)')
+      .select(
+        'id, word, reading, romanization, meaning_vi, jlpt_level, part_of_speech, deck:decks(name, slug, emoji)',
+      )
       .eq('is_active', true)
-      .limit(3),
+      .order('order_index')
+      .limit(32),
 
     supabase
       .from('vocabulary')
@@ -35,7 +65,8 @@ export default async function HomePage() {
     vocabulary_count: (d.vocabulary_count as unknown as { count: number }[])[0]?.count ?? 0,
   })) as DeckWithCount[]
 
-  const words = (wordsRes.data ?? []) as VocabularyWithDeck[]
+  const allWords = (wordsRes.data ?? []) as VocabularyWithDeck[]
+  const words = pickDailyRandom(allWords, 3)
   const totalWords = statsRes.count ?? 0
 
   return (

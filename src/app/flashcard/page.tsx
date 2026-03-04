@@ -14,10 +14,13 @@ export default async function FlashCardAllPage() {
   // fetch theo từng cấp JLPT (mỗi cấp < 1000) rồi gộp lại.
   const levels = ['N5', 'N4', 'N3', 'N2', 'N1'] as const
 
+  const selectColumns =
+    'id, word, reading, romanization, meaning_vi, meaning_en, jlpt_level, part_of_speech'
+
   const levelPromises = levels.map((level) =>
     supabase
       .from('vocabulary')
-      .select('*')
+      .select(selectColumns)
       .eq('is_active', true)
       .eq('jlpt_level', level)
       .order('order_index'),
@@ -25,16 +28,14 @@ export default async function FlashCardAllPage() {
 
   const otherPromise = supabase
     .from('vocabulary')
-    .select('*')
+    .select(selectColumns)
     .eq('is_active', true)
     .is('jlpt_level', null)
     .order('order_index')
 
   const results = await Promise.all([...levelPromises, otherPromise])
 
-  const allCards: Vocabulary[] = results.flatMap((res) => (res.data ?? [])) as Vocabulary[]
-
-  const cards = allCards
+  const cards = results.flatMap((res) => (res.data ?? [])) as Vocabulary[]
 
   if (cards.length === 0) {
     return (
