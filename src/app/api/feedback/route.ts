@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
     const supabase = createServiceClient()
 
-    const { error } = await supabase.from('feedbacks').insert({
+    const payload = {
       site_id: siteId,
       name: name.trim(),
       email: email?.trim() || null,
@@ -31,7 +31,12 @@ export async function POST(req: Request) {
       metadata: {
         source: 'language-learning',
       },
-    })
+    }
+
+    // Cast để tránh mismatch type giữa schema local và Supabase types trên build server.
+    const { error } = await supabase
+      .from('feedbacks')
+      .insert(payload as never)
 
     if (error) {
       console.error('Insert feedback error:', error)
