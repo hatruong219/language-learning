@@ -18,6 +18,9 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_SITE_ID=  ← UUID của site trong bảng sites
+OPENAI_API_KEY=       ← OpenAI: https://platform.openai.com/api-keys
+OPENAI_MODEL=gpt-4.1-mini
+GEMINI_API_KEY=       ← (tuỳ chọn, fallback) Google AI Studio: https://aistudio.google.com/app/apikey
 ```
 
 ## Quy tắc code
@@ -27,7 +30,7 @@ NEXT_PUBLIC_SITE_ID=  ← UUID của site trong bảng sites
 - Dùng `as unknown as Type` khi Supabase type inference không match
 - File naming: pages → `page.tsx`, components → `PascalCase.tsx`, utils → `camelCase.ts`
 
-## Màn hình đã implement (Phase 1)
+## Màn hình đã implement (Phase 1 + Phase 2)
 | Route | Mô tả |
 |-------|-------|
 | `/` | Home: hero, stats, decks nổi bật, từ ngẫu nhiên |
@@ -38,6 +41,7 @@ NEXT_PUBLIC_SITE_ID=  ← UUID của site trong bảng sites
 | `/flashcard` | Flashcard random toàn bộ |
 | `/flashcard/[slug]` | Flashcard theo deck |
 | `/alphabet` | Bảng Hiragana + Katakana với popup TTS |
+| `/writing-test` | Luyện viết: nhận đề ngẫu nhiên, nộp bài, AI chấm điểm |
 
 ## Database (Supabase)
 Tables: `decks`, `vocabulary`, `vocabulary_examples`, `alphabet_characters`

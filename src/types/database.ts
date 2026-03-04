@@ -267,6 +267,94 @@ export interface Database {
           updated_at?: string
         }
       }
+      writing_prompts: {
+        Row: {
+          id: string
+          site_id: string
+          title: string
+          prompt_vi: string
+          prompt_ja: string | null
+          category: 'self' | 'family' | 'hobby' | 'general'
+          jlpt_level: string | null
+          min_words: number
+          is_active: boolean
+          order_index: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          site_id: string
+          title: string
+          prompt_vi: string
+          prompt_ja?: string | null
+          category?: 'self' | 'family' | 'hobby' | 'general'
+          jlpt_level?: string | null
+          min_words?: number
+          is_active?: boolean
+          order_index?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          site_id?: string
+          title?: string
+          prompt_vi?: string
+          prompt_ja?: string | null
+          category?: 'self' | 'family' | 'hobby' | 'general'
+          jlpt_level?: string | null
+          min_words?: number
+          is_active?: boolean
+          order_index?: number
+          created_at?: string
+        }
+      }
+      writing_submissions: {
+        Row: {
+          id: string
+          site_id: string
+          prompt_id: string
+          user_id: string | null
+          session_id: string | null
+          response: string
+          word_count: number | null
+          score: number | null
+          score_grammar: number | null
+          score_vocab: number | null
+          score_content: number | null
+          feedback_vi: string | null
+          errors: Json
+          is_valid_lang: boolean | null
+          graded_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          site_id: string
+          prompt_id: string
+          user_id?: string | null
+          session_id?: string | null
+          response: string
+          score?: number | null
+          score_grammar?: number | null
+          score_vocab?: number | null
+          score_content?: number | null
+          feedback_vi?: string | null
+          errors?: Json
+          is_valid_lang?: boolean | null
+          graded_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          score?: number | null
+          score_grammar?: number | null
+          score_vocab?: number | null
+          score_content?: number | null
+          feedback_vi?: string | null
+          errors?: Json
+          is_valid_lang?: boolean | null
+          graded_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -287,6 +375,25 @@ export type VocabularyExample = Database['public']['Tables']['vocabulary_example
 export type AlphabetCharacter = Database['public']['Tables']['alphabet_characters']['Row']
 export type UserProgress = Database['public']['Tables']['user_progress']['Row']
 export type Feedback = Database['public']['Tables']['feedbacks']['Row']
+export type WritingPrompt = Database['public']['Tables']['writing_prompts']['Row']
+export type WritingSubmission = Database['public']['Tables']['writing_submissions']['Row']
+
+// Writing test specific
+export type GradingError = {
+  original: string
+  corrected: string
+  explanation_vi: string
+}
+
+export type GradingResult = {
+  score: number
+  score_grammar: number
+  score_vocab: number
+  score_content: number
+  feedback_vi: string
+  errors: GradingError[]
+  is_valid_lang: boolean
+}
 
 // With relations
 export type VocabularyWithDeck = Vocabulary & {
