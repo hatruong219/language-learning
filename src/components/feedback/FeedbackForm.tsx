@@ -60,6 +60,34 @@ export function FeedbackForm({ siteId }: FeedbackFormProps) {
     }
   }
 
+  if (state === 'success') {
+    return (
+      <div className="max-w-lg mx-auto bg-card border rounded-3xl p-8 shadow-sm text-center space-y-6">
+        <div className="text-5xl mb-2">🌸</div>
+        <h2 className="text-2xl font-bold mb-1">Cảm ơn cậu rất nhiều!</h2>
+        <p className="text-muted-foreground text-sm md:text-base">
+          Góp ý của cậu đã được gửi thành công. Nhờ những phản hồi như thế này mà bọn mình có thể làm
+          app học tiếng Nhật ngày càng tốt hơn.
+        </p>
+        <p className="text-base font-medium">Tặng cậu một bông hoa nè 💐</p>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-center mt-4">
+          <Button
+            className="sm:flex-1"
+            onClick={() => {
+              setState('idle')
+            }}
+          >
+            Gửi thêm góp ý
+          </Button>
+          <Button asChild variant="outline" className="sm:flex-1">
+            <a href="/">Về trang chủ</a>
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <form
       onSubmit={handleSubmit}
