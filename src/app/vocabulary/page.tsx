@@ -39,7 +39,17 @@ export default async function VocabularyPage({
 
   if (params.deck) query = query.eq('deck_id', params.deck)
   if (params.jlpt) query = query.eq('jlpt_level', params.jlpt)
-  if (params.q) query = query.ilike('word', `%${params.q}%`)
+
+  if (params.q) {
+    const q = params.q.trim()
+    if (q.length > 0) {
+      const like = `%${q}%`
+      // Tìm theo: từ gốc (kanji/kana), hiragana (reading), romaji và nghĩa tiếng Việt
+      query = query.or(
+        `word.ilike.${like},reading.ilike.${like},romanization.ilike.${like},meaning_vi.ilike.${like}`,
+      )
+    }
+  }
 
   const [wordsRes, decksRes] = await Promise.all([
     query,
