@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookOpen, Layers, Zap, Grid3x3, Menu, X } from 'lucide-react'
+import { BookOpen, Layers, Zap, Grid3x3, Menu, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,8 @@ const NAV_LINKS = [
   { href: '/decks', label: 'Chủ đề', icon: Layers },
   { href: '/flashcard', label: 'Flashcard', icon: Zap },
   { href: '/alphabet', label: 'Bảng chữ', icon: Grid3x3 },
-]
+  { href: '/feedback', label: 'Góp ý', icon: MessageCircle },
+] as const
 
 export function Header() {
   const pathname = usePathname()

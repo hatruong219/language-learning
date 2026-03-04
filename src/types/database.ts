@@ -226,6 +226,47 @@ export interface Database {
           updated_at?: string
         }
       }
+      feedbacks: {
+        Row: {
+          id: string
+          site_id: string
+          name: string
+          email: string | null
+          message: string
+          rating: number | null
+          image: string | null
+          status: 'pending' | 'reviewed' | 'archived'
+          metadata: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          site_id: string
+          name: string
+          email?: string | null
+          message: string
+          rating?: number | null
+          image?: string | null
+          status?: 'pending' | 'reviewed' | 'archived'
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          site_id?: string
+          name?: string
+          email?: string | null
+          message?: string
+          rating?: number | null
+          image?: string | null
+          status?: 'pending' | 'reviewed' | 'archived'
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -245,6 +286,7 @@ export type Vocabulary = Database['public']['Tables']['vocabulary']['Row']
 export type VocabularyExample = Database['public']['Tables']['vocabulary_examples']['Row']
 export type AlphabetCharacter = Database['public']['Tables']['alphabet_characters']['Row']
 export type UserProgress = Database['public']['Tables']['user_progress']['Row']
+export type Feedback = Database['public']['Tables']['feedbacks']['Row']
 
 // With relations
 export type VocabularyWithDeck = Vocabulary & {
