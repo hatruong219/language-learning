@@ -163,11 +163,6 @@ export function FeedbackForm({ siteId }: FeedbackFormProps) {
       </div>
 
       {error && <p className="text-xs text-red-500">{error}</p>}
-      {state === 'success' && (
-        <p className="text-xs text-emerald-600">
-          Cảm ơn bạn! Phản hồi đã được gửi đến chúng mình.
-        </p>
-      )}
 
       <Button
         type="submit"
