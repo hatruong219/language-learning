@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { FlashCardDeck } from '@/components/flashcard/FlashCardDeck'
+import { FlashCardSetup } from '@/components/flashcard/FlashCardSetup'
 import type { Deck, Vocabulary } from '@/types/database'
 
 
@@ -43,7 +43,7 @@ export default async function FlashCardDeckPage({
   }
 
   return (
-    <FlashCardDeck
+    <FlashCardSetup
       cards={cards}
       deckName={`${deck.emoji ?? ''} ${deck.name}`}
       backHref={`/decks/${deck.slug}`}

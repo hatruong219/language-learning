@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { speak } from '@/lib/tts'
-import { TTSButton } from '@/components/shared/TTSButton'
+import { Volume2 } from 'lucide-react'
 
 interface AlphabetCharacter {
   id: string
@@ -16,41 +16,34 @@ interface CharacterCellProps {
 }
 
 export function CharacterCell({ char }: CharacterCellProps) {
-  const [selected, setSelected] = useState(false)
+  const [playing, setPlaying] = useState(false)
+
+  function handleClick() {
+    speak(char.character)
+    setPlaying(true)
+    setTimeout(() => setPlaying(false), 600)
+  }
 
   return (
-    <>
-      <button
-        onClick={() => { setSelected(true); speak(char.character) }}
-        className="flex flex-col items-center justify-center p-3 rounded-xl border bg-card hover:bg-accent hover:border-primary transition-all duration-150 cursor-pointer aspect-square"
-        title={char.romanization}
-      >
-        <span className="text-2xl font-bold leading-none mb-1">{char.character}</span>
-        <span className="text-xs text-muted-foreground">{char.romanization}</span>
-      </button>
-
-      {/* Simple inline popup using dialog */}
-      {selected && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          onClick={() => setSelected(false)}
-        >
-          <div
-            className="bg-card border rounded-2xl p-8 text-center shadow-xl max-w-xs w-full mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="text-7xl font-bold mb-2">{char.character}</div>
-            <div className="text-xl text-muted-foreground mb-4">{char.romanization}</div>
-            <TTSButton text={char.character} variant="outline" size="default" className="w-full" />
-            <button
-              onClick={() => setSelected(false)}
-              className="mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
+    <button
+      onClick={handleClick}
+      className={`relative w-full h-20 md:h-24 flex flex-col items-center justify-center px-6 py-4 rounded-2xl border bg-card hover:bg-accent hover:border-primary transition-all duration-150 cursor-pointer ${playing ? 'bg-primary/10 border-primary scale-95' : ''
+        }`}
+      title={`${char.character} — ${char.romanization}`}
+    >
+      {playing && (
+        <span className="absolute top-2 right-2 text-primary/80">
+          <span className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
+          <Volume2 className="relative h-4 w-4 animate-pulse drop-shadow-sm" />
+        </span>
       )}
-    </>
+
+      <span className="text-2xl font-bold leading-none mb-2">
+        {char.character}
+      </span>
+      <span className="text-xs text-muted-foreground">
+        {char.romanization}
+      </span>
+    </button>
   )
 }

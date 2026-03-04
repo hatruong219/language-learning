@@ -12,20 +12,24 @@ interface WordCardProps {
 
 export function WordCard({ word, showDeck = false }: WordCardProps) {
   return (
-    <Card className="group hover:shadow-md transition-all duration-200 hover:-translate-y-0.5">
+    <Card className="group hover:shadow-md transition-all duration-200 hover:-translate-y-0.5 relative hover:border-primary/50">
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             {/* Word */}
             <div className="flex items-center gap-2 mb-1">
-              <Link href={`/vocabulary/${word.id}`}>
+              <Link
+                href={`/vocabulary/${word.id}`}
+                className="after:absolute after:inset-0 z-0"
+                aria-label={`Xem chi tiết từ ${word.word}`}
+              >
                 <FuriganaText
                   word={word.word}
                   reading={word.reading}
-                  className="text-2xl font-bold leading-tight hover:text-primary transition-colors cursor-pointer"
+                  className="text-2xl font-bold leading-tight group-hover:text-primary transition-colors cursor-pointer"
                 />
               </Link>
-              <TTSButton text={word.word} />
+              <TTSButton text={word.word} className="relative z-10" />
             </div>
 
             {/* Romanization */}
@@ -47,7 +51,7 @@ export function WordCard({ word, showDeck = false }: WordCardProps) {
               {showDeck && word.deck && (
                 <Link
                   href={`/decks/${word.deck.slug}`}
-                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                  className="relative z-10 text-xs text-muted-foreground hover:text-primary transition-colors"
                 >
                   {word.deck.emoji} {word.deck.name}
                 </Link>
@@ -59,3 +63,4 @@ export function WordCard({ word, showDeck = false }: WordCardProps) {
     </Card>
   )
 }
+
