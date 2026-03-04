@@ -13,8 +13,10 @@ if (!serviceRoleKey) {
 }
 
 export function createServiceClient() {
-  return createClient<Database>(url, serviceRoleKey, {
+  // Đã check ở trên, dùng non-null assertion để TS không báo lỗi trên Vercel
+  return createClient<Database>(url!, serviceRoleKey!, {
     auth: { persistSession: false },
   })
 }
+
 
