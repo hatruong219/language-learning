@@ -127,3 +127,112 @@ export async function gradeWritingWithGemini(
   const data = await res.json()
   return parseGeminiResponse(data)
 }
+
+// ─── Character Writing Practice (Vision API) ────────────────────────────────
+
+import type { CharacterGradingResult } from '@/types/database'
+
+const GEMINI_VISION_URL =
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+
+function buildCharacterGradingPrompt(character: string, romanization: string, script: string): string {
+  return `Bạn là giáo viên dạy viết chữ Nhật chuyên nghiệp. Một học sinh vừa vẽ ký tự tiếng Nhật sau đây bằng tay.
+
+Ký tự mục tiêu: "${character}" (${romanization}) — bảng chữ ${script === 'hiragana' ? 'Hiragana' : 'Katakana'}
+
+Hãy xem ảnh và đánh giá:
+1. Hình dạng tổng thể có giống ký tự chuẩn không
+2. Các nét chính có đúng không (số nét, hướng nét)
+3. Tỉ lệ và bố cục
+
+Trả về JSON hợp lệ (không markdown, không text ngoài JSON):
+{
+  "is_correct": true,
+  "score": 80,
+  "feedback_vi": "Nét viết khá đúng, tuy nhiên nét ngang cuối hơi ngắn.",
+  "stroke_notes": ["Nét đầu đúng hướng", "Nét cong giữa tốt", "Nét cuối cần dài hơn"]
+}
+
+Nếu canvas trắng hoặc không có chữ → is_correct: false, score: 0, feedback_vi: "Chưa vẽ gì cả, hãy thử lại!", stroke_notes: []`
+}
+
+function parseCharacterGradingResponse(data: unknown): CharacterGradingResult {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw = data as any
+  const text: string = raw?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+
+  if (!text) {
+    throw new Error('Gemini Vision không trả về kết quả.')
+  }
+
+  const cleaned = text.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim()
+
+  let parsed: CharacterGradingResult
+  try {
+    parsed = JSON.parse(cleaned)
+  } catch {
+    throw new Error(`Không parse được kết quả: ${text}`)
+  }
+
+  return {
+    is_correct: Boolean(parsed.is_correct),
+    score: Math.max(0, Math.min(100, Number(parsed.score ?? 0))),
+    feedback_vi: String(parsed.feedback_vi ?? ''),
+    stroke_notes: Array.isArray(parsed.stroke_notes) ? parsed.stroke_notes.map(String) : [],
+  }
+}
+
+export async function gradeCharacterWithGemini(
+  character: string,
+  romanization: string,
+  script: string,
+  imageBase64: string, // base64 PNG (without data URL prefix)
+): Promise<CharacterGradingResult> {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) throw new Error('GEMINI_API_KEY chưa được cấu hình')
+
+  const body = {
+    contents: [
+      {
+        parts: [
+          { text: buildCharacterGradingPrompt(character, romanization, script) },
+          {
+            inlineData: {
+              mimeType: 'image/png',
+              data: imageBase64,
+            },
+          },
+        ],
+      },
+    ],
+    generationConfig: {
+      temperature: 0.1,
+      maxOutputTokens: 512,
+    },
+  }
+
+  const res = await fetch(`${GEMINI_VISION_URL}?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+
+  if (res.status === 429) {
+    await new Promise((r) => setTimeout(r, 3000))
+    const retryRes = await fetch(`${GEMINI_VISION_URL}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!retryRes.ok) throw new Error('Gemini API đang quá tải, vui lòng thử lại.')
+    return parseCharacterGradingResponse(await retryRes.json())
+  }
+
+  if (!res.ok) {
+    const errText = await res.text()
+    console.error(`[Gemini Vision] HTTP ${res.status}:`, errText)
+    throw new Error(`Gemini Vision API lỗi: ${res.status}`)
+  }
+
+  return parseCharacterGradingResponse(await res.json())
+}

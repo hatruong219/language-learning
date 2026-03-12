@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { CharacterCell } from '@/components/alphabet/CharacterCell'
+import { AlphabetPageClient } from '@/components/alphabet/AlphabetPageClient'
 import type { AlphabetCharacter } from '@/types/database'
 
 export const metadata = {
@@ -113,9 +114,10 @@ export default async function AlphabetPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-12 text-center w-full">
         <h1 className="text-3xl font-bold mb-2">Bảng chữ cái tiếng Nhật</h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mb-4">
           Nhấp vào ký tự để nghe phát âm
         </p>
+        <AlphabetPageClient hiragana={hiragana} katakana={katakana} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24 max-w-7xl mx-auto">

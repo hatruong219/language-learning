@@ -395,6 +395,14 @@ export type GradingResult = {
   is_valid_lang: boolean
 }
 
+// Character writing practice grading
+export type CharacterGradingResult = {
+  is_correct: boolean
+  score: number           // 0-100
+  feedback_vi: string
+  stroke_notes: string[]  // nhận xét từng nét
+}
+
 // With relations
 export type VocabularyWithDeck = Vocabulary & {
   deck: Pick<Deck, 'name' | 'slug' | 'emoji'> | null

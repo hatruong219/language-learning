@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: [
+    'tesseract.js',
+    'tesseract.js-core',
+    'node-fetch',
+    'bmp-js',
+    'idb-keyval',
+    'wasm-feature-detect',
+    'zlibjs',
+  ],
 };
 
 export default nextConfig;
