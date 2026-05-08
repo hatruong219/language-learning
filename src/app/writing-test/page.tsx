@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Luyện viết — Chấm điểm AI',
-  description: 'Nhận đề viết ngẫu nhiên và được chấm điểm tự động bằng AI Gemini.',
+  description: 'Nhận đề viết ngẫu nhiên và được chấm điểm tự động bằng AI.',
 }
 
 export default async function WritingTestPage() {

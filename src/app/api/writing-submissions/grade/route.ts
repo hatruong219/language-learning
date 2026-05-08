@@ -1,7 +1,7 @@
 // POST /api/writing-submissions/grade
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { gradeWritingWithGemini } from '@/lib/gemini'
+import { gradeWritingWithGroq } from '@/lib/groq'
 
 type SubmissionWithPrompt = {
   id: string
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Khong tim thay submission.' }, { status: 404 })
     }
 
-    const grading = await gradeWritingWithGemini(
+    const grading = await gradeWritingWithGroq(
       data.writing_prompts.prompt_vi,
       data.response,
       data.writing_prompts.min_words,

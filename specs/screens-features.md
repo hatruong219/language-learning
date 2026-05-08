@@ -15,9 +15,8 @@
 │   └── /decks/[deck-slug]         ← Từ trong deck đó
 ├── /flashcard                     ← Học flashcard (random toàn bộ)
 │   └── /flashcard/[deck-slug]     ← Flashcard theo deck
-├── /alphabet                      ← Bảng chữ cái
-│   ├── /alphabet/hiragana         ← Bảng hiragana
-│   └── /alphabet/katakana         ← Bảng katakana
+├── /alphabet                      ← Bảng chữ cái Hiragana + Katakana
+├── /writing-test                  ← Luyện viết, AI chấm điểm
 ├── /quiz                          ← Quiz mode (Phase 2)
 └── /profile                       ← Tiến trình cá nhân (Phase 2)
 ```
@@ -192,7 +191,35 @@
 
 ---
 
-### 🟡 [S08] Quiz Mode — `/quiz`
+### 🔴 [S08] Writing Test — `/writing-test`
+
+**Mục đích:** Luyện viết tiếng Nhật, AI chấm điểm và đưa ra nhận xét chi tiết.
+
+**Layout:**
+```
+[Đề bài: hiển thị prompt_vi + yêu cầu số từ tối thiểu]
+[Textarea: người dùng viết tiếng Nhật]
+[Submit button]
+---
+[Kết quả (sau khi submit)]
+  - Tổng điểm / 100
+  - Điểm chi tiết: Ngữ pháp /40 | Từ vựng /30 | Nội dung /30
+  - Nhận xét tổng quan (tiếng Việt)
+  - Danh sách lỗi (original → corrected + giải thích)
+[Button: Làm đề khác]
+```
+
+**AI Grading (Groq):**
+- Primary: `llama-3.3-70b-versatile`
+- Fallback khi rate limit: `llama-3.1-8b-instant`
+- Kiểm tra bài có phải tiếng Nhật không (`is_valid_lang`)
+- Điểm: grammar (0–40) + vocab (0–30) + content (0–30) = tổng (0–100)
+
+**API:** `POST /api/writing-submissions` — submit + grade trong 1 request
+
+---
+
+### 🟡 [S09] Quiz Mode — `/quiz`
 
 **Phase 2**
 
@@ -212,7 +239,7 @@
 
 ---
 
-### 🟡 [S09] Profile & Progress — `/profile`
+### 🟡 [S10] Profile & Progress — `/profile`
 
 **Phase 2 — cần auth**
 

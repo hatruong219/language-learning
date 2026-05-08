@@ -109,6 +109,44 @@ users (Supabase Auth)
 
 ---
 
+### `writing_prompts` — Đề bài luyện viết
+
+| Column | Type | Constraint | Mô tả |
+|--------|------|-----------|-------|
+| `id` | UUID | PK | |
+| `site_id` | UUID | FK → sites(id), NOT NULL | |
+| `prompt_vi` | TEXT | NOT NULL | Đề bài bằng tiếng Việt |
+| `min_words` | INT | default 30 | Số từ tối thiểu |
+| `is_active` | BOOLEAN | default true | |
+| `created_at` | TIMESTAMPTZ | default now() | |
+
+**RLS:** Public read.
+
+---
+
+### `writing_submissions` — Bài nộp
+
+| Column | Type | Constraint | Mô tả |
+|--------|------|-----------|-------|
+| `id` | UUID | PK | |
+| `site_id` | UUID | FK → sites(id), NOT NULL | |
+| `prompt_id` | UUID | FK → writing_prompts(id) | |
+| `session_id` | UUID | nullable | Client-generated session |
+| `response` | TEXT | NOT NULL | Bài viết của người dùng |
+| `score` | INT | nullable | Tổng điểm (0–100) |
+| `score_grammar` | INT | nullable | Ngữ pháp (0–40) |
+| `score_vocab` | INT | nullable | Từ vựng (0–30) |
+| `score_content` | INT | nullable | Nội dung (0–30) |
+| `feedback_vi` | TEXT | nullable | Nhận xét tổng quan tiếng Việt |
+| `errors` | JSONB | default '[]' | [{original, corrected, explanation_vi}] |
+| `is_valid_lang` | BOOLEAN | nullable | Bài có phải tiếng Nhật không |
+| `graded_at` | TIMESTAMPTZ | nullable | |
+| `created_at` | TIMESTAMPTZ | default now() | |
+
+**RLS:** Public insert. No read policy (anonymous).
+
+---
+
 ### `user_progress` — Tiến trình học (Phase 2 — cần auth)
 
 | Column | Type | Constraint | Mô tả |
@@ -152,8 +190,9 @@ users (Supabase Auth)
 -- 2. vocabulary
 -- 3. vocabulary_examples
 -- 4. alphabet_characters
--- 5. user_progress (sau khi có auth)
--- 6. study_sessions (sau khi có user_progress)
+-- 5. writing_prompts + writing_submissions
+-- 6. user_progress (sau khi có auth)
+-- 7. study_sessions (sau khi có user_progress)
 ```
 
 ---

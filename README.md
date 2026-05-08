@@ -1,59 +1,48 @@
 ## 日本語を学ぼう — Language Learning App
 
-Ứng dụng web giúp học tiếng Nhật (và có thể mở rộng thêm ngôn ngữ khác sau này) với từ vựng, flashcard, bảng chữ cái và JLPT filter rõ ràng.
+Ứng dụng web học tiếng Nhật với từ vựng, flashcard, bảng chữ cái, luyện viết và chấm điểm tự động bằng AI.
 
-### 🔧 Tech stack
-- **Frontend**: `Next.js 14+ (App Router)`, `TypeScript (strict)`, `Tailwind CSS v4`, `shadcn/ui`, `framer-motion`
-- **Backend / Data**: `Supabase` (PostgreSQL, Auth trong tương lai)
-- **Khác**: Web Speech API (Text‑to‑Speech), CSS animations
-
----
-
-### ✨ Tính năng chính
-- **Từ vựng**  
-  - Danh sách tất cả từ vựng, filter theo **deck / chủ đề**, **JLPT (N5 → N1)**, và search.  
-  - Thẻ từ hiển thị chữ Nhật, furigana, romaji, nghĩa tiếng Việt, badge JLPT, nút nghe TTS.
-
-- **Flashcard**  
-  - Học **toàn bộ từ vựng** hoặc theo từng deck: `/flashcard`, `/flashcard/[slug]`.  
-  - Chọn số lượng thẻ (10 / 20 / 30 / 50 / tất cả / tùy chỉnh) và **lọc theo nhiều cấp độ JLPT cùng lúc**.  
-  - Giao diện flashcard có hiệu ứng lật, auto‑play TTS khi lật sang mặt sau, phím tắt (Space / ← / ↓ / →), thống kê sau khi học xong.
-
-- **Chủ đề (Decks)**  
-  - Trang `/decks` hiển thị các deck với emoji, mô tả ngắn, số lượng từ.  
-  - Mỗi deck có trang chi tiết và nút “Học flashcard”.
-
-- **Bảng chữ cái**  
-  - Trang `/alphabet` hiển thị **hiragana** và **katakana** theo hàng A / K / S / T / N / H / M / Y / R / W.  
-  - Mỗi ô chữ có romaji, click để phát âm, icon loa nhấp nháy khi đang đọc.
+### Tech stack
+- **Frontend**: Next.js 16 (App Router), TypeScript strict, Tailwind CSS v4, shadcn/ui, framer-motion
+- **Backend / Data**: Supabase (PostgreSQL)
+- **AI**: Groq API — `llama-3.3-70b-versatile` (fallback: `llama-3.1-8b-instant`)
+- **TTS**: Web Speech API (browser native)
 
 ---
 
-### 🖼 Screenshots
+### Tính năng chính
 
-> Gợi ý: lưu screenshot vào `public/screens/` rồi update đường dẫn bên dưới cho khớp.
-
-- **Trang Flashcard — chọn số lượng & JLPT**
-  
-  `![Flashcard setup](public/screens/flashcard-setup.png)`
-
-- **Bảng chữ cái Hiragana/Katakana**
-  
-  `![Alphabet chart](public/screens/alphabet.png)`
-
-- **Danh sách từ vựng**
-  
-  `![Vocabulary list](public/screens/vocabulary-list.png)`
+- **Từ vựng** — Danh sách, filter theo deck / JLPT / search, chi tiết từ với furigana, TTS, câu ví dụ.
+- **Flashcard** — Học toàn bộ hoặc theo deck, chọn số lượng thẻ, lọc JLPT, flip animation, auto-play TTS, phím tắt.
+- **Chủ đề (Decks)** — Grid deck với emoji, mô tả, số từ, nút học ngay.
+- **Bảng chữ cái** — Hiragana + Katakana theo hàng, click nghe phát âm.
+- **Luyện viết** — Nhận đề ngẫu nhiên, nộp bài viết tiếng Nhật, AI chấm điểm grammar/vocab/content và đưa ra nhận xét chi tiết.
 
 ---
 
-### 🚀 Chạy local
+### Routes đã implement
+
+| Route | Mô tả |
+|-------|-------|
+| `/` | Home: hero, stats, decks nổi bật, từ ngẫu nhiên |
+| `/vocabulary` | Danh sách từ vựng, filter, pagination |
+| `/vocabulary/[id]` | Chi tiết từ: furigana, TTS, câu ví dụ |
+| `/decks` | Danh sách tất cả deck |
+| `/decks/[slug]` | Từ trong deck + nút học flashcard |
+| `/flashcard` | Flashcard random toàn bộ |
+| `/flashcard/[slug]` | Flashcard theo deck |
+| `/alphabet` | Bảng Hiragana + Katakana với popup TTS |
+| `/writing-test` | Luyện viết: đề ngẫu nhiên, nộp bài, AI chấm điểm |
+
+---
+
+### Chạy local
 
 Yêu cầu: Node.js LTS, `pnpm`.
 
 ```bash
 pnpm install
-cp .env.local.example .env.local  # điền các env bên dưới
+cp .env.example .env.local  # điền các env vars bên dưới
 pnpm dev
 ```
 
@@ -61,39 +50,42 @@ pnpm dev
 
 ---
 
-### 🔐 Biến môi trường
-
-File `.env.local`:
+### Biến môi trường
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_SITE_ID=  # UUID của site trong bảng sites
+NEXT_PUBLIC_SITE_ID=   # UUID của site trong bảng sites
+
+# Groq — chấm bài viết tự động
+# Lấy key tại: https://console.groq.com/keys
+GROQ_API_KEY=
 ```
 
 ---
 
-### 🗄 Cấu trúc & Database (tóm tắt)
+### Cấu trúc chính
 
-- `src/app/` — App Router pages (`/`, `/vocabulary`, `/decks`, `/flashcard`, `/alphabet`, …)  
-- `src/components/` — UI components (PascalCase.tsx)  
-- `src/lib/supabase/` — client/server helpers cho Supabase  
-- `src/lib/tts.ts` — wrapper Web Speech API  
-- `src/types/database.ts` — type cho các bảng Supabase  
-- `supabase/migrations/` — file SQL migration
+```
+src/
+├── app/                      ← App Router pages
+├── components/               ← UI components (PascalCase.tsx)
+├── lib/
+│   ├── supabase/             ← client.ts / server.ts
+│   ├── groq.ts               ← AI grading (Groq API)
+│   ├── tts.ts                ← Web Speech API wrapper
+│   └── flashcard-utils.ts    ← Shuffle + state machine
+├── types/database.ts         ← Supabase table types
+supabase/migrations/          ← SQL migrations theo thứ tự
+```
 
-Các bảng chính:
-- `decks` — chủ đề học tập  
-- `vocabulary` — từ vựng (gồm `jlpt_level`, `deck_id`, …)  
-- `vocabulary_examples` — câu ví dụ  
-- `alphabet_characters` — bảng chữ cái  
-- (Phase 2) `user_progress`, `study_sessions` cho tracking tiến độ
+Database tables: `decks`, `vocabulary`, `vocabulary_examples`, `alphabet_characters`, `writing_prompts`, `writing_submissions`, `user_progress`, `study_sessions`
 
 ---
 
-### 📌 Roadmap ngắn
-- Seed đủ bộ từ JLPT N5–N4 (~800–1500 từ).  
-- Thêm **Quiz mode** (`/quiz`) với multiple‑choice.  
-- Lưu **tiến độ học** theo user, spaced repetition.
-
+### Roadmap
+- Seed đủ bộ từ JLPT N5–N4 (~800–1500 từ)
+- Quiz mode `/quiz`
+- User progress tracking (cần auth)
+- Spaced repetition

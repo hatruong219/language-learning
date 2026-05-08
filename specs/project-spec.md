@@ -1,58 +1,56 @@
 # Project Spec — Website Học Ngoại Ngữ (Language Learning)
 
 ## 1. Tên project
-- **language-learning** (tên thư mục / domain gợi ý: `nihongo.gnourt.dev` hoặc `lang.gnourt.dev`)
+**language-learning** — domain: `nihongo.gnourt.dev` hoặc `lang.gnourt.dev`
 
-## 2. Mục tiêu / Mô tả ngắn
-Website cá nhân giúp học ngoại ngữ — ban đầu tập trung vào **tiếng Nhật**, sau sẽ mở rộng sang các ngôn ngữ khác.
+## 2. Mục tiêu
+Website cá nhân học tiếng Nhật (sau sẽ mở rộng ngôn ngữ khác):
 - Quản lý từ vựng theo topic / deck
 - Học qua flashcard ngẫu nhiên
-- Có âm thanh đọc từ (Text-to-Speech)
-- Bảng chữ cái tiếng Nhật (Hiragana / Katakana / Kanji cơ bản)
+- Text-to-Speech đọc từ
+- Bảng chữ cái Hiragana / Katakana
+- Luyện viết và nhận phản hồi từ AI
 
-## 3. Công nghệ sử dụng
-- **Frontend:** Next.js 15 (TypeScript, App Router)
-  - Lý do chọn Next.js: có auth, dashboard quản lý từ, real-time (tương lai), tương tác phức tạp (flashcard, quiz)
-- **Backend:** Supabase (dùng chung với hệ thống)
-- **UI:** Tailwind CSS v4 + shadcn/ui
-- **TTS (Text-to-Speech):** Web Speech API (browser native, free) — tương lai có thể dùng Google TTS / ElevenLabs
-- **Khác:**
-  - `react-hook-form` + `zod` — form validation
-  - `framer-motion` — animation cho flashcard flip
-  - `@supabase/ssr` — auth SSR
+## 3. Công nghệ
 
-## 4. Liên kết với hệ thống quản lý tập trung
-- **site_id:** Có — đăng ký 1 record trong bảng `sites` của web-mgmt-platform
-- **Dùng chung bảng users:** Có — Supabase Auth
-- **Các bảng dữ liệu riêng:** Xem file `database-schema.md`
+| Phần | Công nghệ |
+|------|-----------|
+| Framework | Next.js 16 (TypeScript strict, App Router) |
+| Database | Supabase (PostgreSQL) |
+| UI | Tailwind CSS v4 + shadcn/ui |
+| Animation | framer-motion (flashcard flip) |
+| TTS | Web Speech API (browser native) |
+| AI Grading | Groq API — llama-3.3-70b-versatile |
+| Deploy | Vercel |
 
-## 5. Chức năng chính
-Xem chi tiết tại `screens-features.md`
+## 4. Liên kết hệ thống
+- `site_id`: đăng ký 1 record trong bảng `sites` của web-mgmt-platform
+- Supabase Auth: dùng chung (Phase 2)
+- Database schema riêng: xem `database-schema.md`
 
-**Tóm tắt:**
-- [ ] Danh sách từ vựng (có giải nghĩa, phiên âm, ví dụ)
-- [ ] Bảng chữ cái Hiragana / Katakana
-- [ ] Flashcard học (ngẫu nhiên, theo deck)
-- [ ] Text-to-Speech đọc từ
-- [ ] Quản lý deck / topic
-- [ ] Thống kê học tập (basic)
-- [ ] Quiz mode (trắc nghiệm)
+## 5. Chức năng đã implement (Phase 1)
 
-## 6. Yêu cầu UI/UX
-- Đơn giản, tối giản, hiện đại
-- Mobile responsive (ưu tiên mobile-first — học trên điện thoại)
-- Dark mode support
-- Font hỗ trợ tiếng Nhật (Noto Sans JP)
-- Animation mượt cho flashcard (flip effect)
+- [x] Danh sách từ vựng (filter deck / JLPT / search, pagination)
+- [x] Chi tiết từ (furigana, TTS, câu ví dụ)
+- [x] Bảng chữ cái Hiragana / Katakana
+- [x] Flashcard (random, theo deck, chọn số lượng, lọc JLPT, phím tắt)
+- [x] Luyện viết — AI chấm điểm grammar / vocab / content (Groq)
+- [x] Deploy Vercel
 
-## 7. Quy tắc bảo mật & phân quyền
-- **Phase 1:** Tất cả màn học (vocabulary, flashcard, alphabet) đều **public** — không cần đăng nhập
-- **Phase 2 (tương lai):** 
-  - Free user: xem, học từ có sẵn
-  - Premium user: thêm từ mới, tạo deck riêng, sync progress
-- RLS Supabase: bật cho các bảng user-specific (progress, custom decks)
+## 6. Roadmap
 
-## 8. Ghi chú khác
-- Bắt đầu với tiếng Nhật, schema thiết kế để sau có thể thêm `language_code` cho các ngôn ngữ khác
-- TTS dùng Web Speech API trước (miễn phí), nếu không hỗ trợ câu phức tạp thì upgrade lên API trả phí
-- Ưu tiên implement: vocabulary list → flashcard → alphabet chart → quiz
+- [ ] Seed đủ JLPT N5–N4 (~800–1500 từ)
+- [ ] Quiz mode `/quiz`
+- [ ] User progress tracking (cần Supabase Auth)
+- [ ] Spaced repetition
+- [ ] Multi-language support
+
+## 7. Yêu cầu UI/UX
+- Mobile-first, dark mode
+- Font Noto Sans JP
+- Animation mượt (framer-motion)
+
+## 8. Bảo mật & phân quyền
+- **Phase 1:** Tất cả màn học đều public, không cần đăng nhập
+- **Phase 2:** User progress, custom decks → cần auth
+- RLS Supabase bật cho các bảng user-specific
