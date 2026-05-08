@@ -6,7 +6,7 @@ import { gradeWritingWithGroq } from '@/lib/groq'
 type SubmissionWithPrompt = {
   id: string
   response: string
-  writing_prompts: { prompt_vi: string; min_words: number }
+  writing_prompts: { prompt_vi: string; min_words: number; jlpt_level: string | null }
 }
 
 export async function POST(req: Request) {
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     const { data, error } = await supabase
       .from('writing_submissions')
-      .select('id, response, writing_prompts(prompt_vi, min_words)')
+      .select('id, response, writing_prompts(prompt_vi, min_words, jlpt_level)')
       .eq('id', submission_id)
       .single() as { data: SubmissionWithPrompt | null; error: unknown }
 
@@ -33,6 +33,7 @@ export async function POST(req: Request) {
       data.writing_prompts.prompt_vi,
       data.response,
       data.writing_prompts.min_words,
+      data.writing_prompts.jlpt_level,
     )
 
     await supabase
