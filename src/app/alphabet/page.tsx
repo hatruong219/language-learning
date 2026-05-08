@@ -170,11 +170,13 @@ function AlphabetGrid({ characters, groupOrder = GROUP_ORDER }: { characters: Al
 
 export default async function AlphabetPage() {
   const supabase = await createClient()
+  const siteId = process.env.NEXT_PUBLIC_SITE_ID ?? ''
 
   const { data } = await supabase
     .from('alphabet_characters')
-    .select('*')
+    .select('id, script, character, romanization, group_name, order_index')
     .eq('language_code', 'ja')
+    .eq('site_id', siteId)
     .order('order_index')
 
   const characters = (data ?? []) as AlphabetCharacter[]

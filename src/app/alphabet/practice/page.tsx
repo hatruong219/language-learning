@@ -13,10 +13,13 @@ export const metadata: Metadata = {
 export default async function AlphabetPracticePage() {
   const supabase = await createClient()
 
+  const siteId = process.env.NEXT_PUBLIC_SITE_ID ?? ''
+
   const { data } = await supabase
     .from('alphabet_characters')
-    .select('*')
+    .select('id, script, character, romanization, group_name, order_index')
     .eq('language_code', 'ja')
+    .eq('site_id', siteId)
     .in('script', ['hiragana', 'katakana'])
     .lte('order_index', 46)
     .order('order_index')
