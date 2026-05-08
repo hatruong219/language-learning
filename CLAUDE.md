@@ -18,9 +18,7 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_SITE_ID=  ← UUID của site trong bảng sites
-OPENAI_API_KEY=       ← OpenAI: https://platform.openai.com/api-keys
-OPENAI_MODEL=gpt-4.1-mini
-GEMINI_API_KEY=       ← (tuỳ chọn, fallback) Google AI Studio: https://aistudio.google.com/app/apikey
+GROQ_API_KEY=         ← Groq: https://console.groq.com/keys (primary: llama-3.3-70b-versatile, fallback: llama-3.1-8b-instant)
 ```
 
 ## Quy tắc code

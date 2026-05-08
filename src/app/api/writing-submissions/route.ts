@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { gradeWritingWithGemini } from '@/lib/gemini'
+import { gradeWritingWithGroq } from '@/lib/groq'
 import type { WritingPrompt, WritingSubmission } from '@/types/database'
 
 export async function POST(req: Request) {
@@ -64,7 +64,7 @@ export async function POST(req: Request) {
       submissionId = submission?.id ?? null
     }
 
-    const grading = await gradeWritingWithGemini(promptVi, response.trim(), minWords)
+    const grading = await gradeWritingWithGroq(promptVi, response.trim(), minWords)
 
     if (submissionId) {
       await supabase

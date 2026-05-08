@@ -1,7 +1,6 @@
 import type { GradingResult } from '@/types/database'
 
-const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent'
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
 function buildGradingPrompt(prompt_vi: string, response: string, min_words: number): string {
   return `Bạn là giáo viên tiếng Nhật chuyên nghiệp. Nhiệm vụ của bạn là chấm bài viết tiếng Nhật của học sinh.
@@ -42,15 +41,14 @@ Hãy trả về JSON hợp lệ theo đúng format sau (không thêm markdown, k
 }`
 }
 
-function parseGeminiResponse(data: unknown): GradingResult {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const raw = data as any
-  const text: string = raw?.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
+function parseGroqResponse(data: unknown): GradingResult {
+  const raw = data as Record<string, unknown>
+  const text: string =
+    (raw?.choices as Array<{ message: { content: string } }>)?.[0]?.message?.content ?? ''
 
   if (!text) {
-    console.error('[Gemini] Raw response:', JSON.stringify(raw, null, 2))
-    throw new Error(`Gemini không trả về text. promptFeedback: ${JSON.stringify(raw?.promptFeedback)}`)
+    console.error('[Groq] Raw response:', JSON.stringify(raw, null, 2))
+    throw new Error('Groq không trả về text.')
   }
 
   const cleaned = text.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim()
@@ -59,8 +57,8 @@ function parseGeminiResponse(data: unknown): GradingResult {
   try {
     parsed = JSON.parse(cleaned)
   } catch {
-    console.error('[Gemini] Raw text không parse được:', text)
-    throw new Error(`Không parse được kết quả từ Gemini: ${text}`)
+    console.error('[Groq] Raw text không parse được:', text)
+    throw new Error(`Không parse được kết quả từ Groq: ${text}`)
   }
 
   return {
@@ -74,56 +72,51 @@ function parseGeminiResponse(data: unknown): GradingResult {
   }
 }
 
-export async function gradeWritingWithGemini(
+async function callGroq(apiKey: string, model: string, prompt: string): Promise<Response> {
+  return fetch(GROQ_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.2,
+      max_tokens: 2048,
+    }),
+  })
+}
+
+export async function gradeWritingWithGroq(
   prompt_vi: string,
   response: string,
   min_words: number,
 ): Promise<GradingResult> {
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) throw new Error('GEMINI_API_KEY chưa được cấu hình')
+  const apiKey = process.env.GROQ_API_KEY
+  if (!apiKey) throw new Error('GROQ_API_KEY chưa được cấu hình')
 
-  const body = {
-    contents: [
-      {
-        parts: [{ text: buildGradingPrompt(prompt_vi, response, min_words) }],
-      },
-    ],
-    generationConfig: {
-      temperature: 0.2,
-      maxOutputTokens: 2048,
-    },
-  }
+  const primaryModel = process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile'
+  const fallbackModel = process.env.GROQ_MODEL_FALLBACK ?? 'llama-3.1-8b-instant'
 
-  const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  })
+  const prompt = buildGradingPrompt(prompt_vi, response, min_words)
 
-  // Retry 1 lần sau 3s nếu rate limit
+  let res = await callGroq(apiKey, primaryModel, prompt)
+
+  // Rate limit trên primary → thử fallback model
   if (res.status === 429) {
-    await new Promise((r) => setTimeout(r, 3000))
-    const retryRes = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-    if (!retryRes.ok) {
-      console.error(`[Gemini] Retry failed HTTP ${retryRes.status}`)
-      throw new Error('Gemini API đang quá tải, vui lòng thử lại sau ít phút.')
-    }
-    return parseGeminiResponse(await retryRes.json())
+    console.warn('[Groq] Rate limit trên primary model, chuyển sang fallback...')
+    res = await callGroq(apiKey, fallbackModel, prompt)
   }
 
   if (!res.ok) {
     const errText = await res.text()
-    console.error(`[Gemini] HTTP ${res.status}:`, errText)
-    let errMsg = `Gemini API lỗi: ${res.status}`
-    if (res.status === 429) errMsg = 'Gemini API đang quá tải, vui lòng thử lại sau vài giây.'
-    if (res.status === 403) errMsg = 'GEMINI_API_KEY không hợp lệ hoặc chưa được kích hoạt.'
-    throw new Error(errMsg)
+    console.error(`[Groq] HTTP ${res.status}:`, errText)
+    if (res.status === 429) throw new Error('Groq API đang quá tải, vui lòng thử lại sau ít phút.')
+    if (res.status === 401) throw new Error('GROQ_API_KEY không hợp lệ.')
+    throw new Error(`Groq API lỗi: ${res.status}`)
   }
 
   const data = await res.json()
-  return parseGeminiResponse(data)
+  return parseGroqResponse(data)
 }
