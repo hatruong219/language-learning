@@ -204,6 +204,21 @@ export function PracticeClient({ characters }: { characters: AlphabetCharacter[]
     canvasRef.current?.clear()
   }
 
+  // Enter → "Tiếp theo": delay 150ms để tránh nhận nhầm Enter vừa trigger checkType
+  useEffect(() => {
+    if (!checked && drawScore === null) return
+    let handler: ((e: KeyboardEvent) => void) | null = null
+    const id = setTimeout(() => {
+      handler = (e: KeyboardEvent) => { if (e.key === 'Enter') next() }
+      window.addEventListener('keydown', handler)
+    }, 150)
+    return () => {
+      clearTimeout(id)
+      if (handler) window.removeEventListener('keydown', handler)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checked, drawScore])
+
   function restart() {
     setPhase('setup')
     setResults([])
