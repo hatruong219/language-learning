@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { CharacterCell } from '@/components/alphabet/CharacterCell'
 import type { AlphabetCharacter } from '@/types/database'
+import Link from 'next/link'
+import { PenLine } from 'lucide-react'
 
 export const metadata = {
   title: 'Bảng chữ cái tiếng Nhật',
@@ -113,9 +115,13 @@ export default async function AlphabetPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-12 text-center w-full">
         <h1 className="text-3xl font-bold mb-2">Bảng chữ cái tiếng Nhật</h1>
-        <p className="text-muted-foreground">
-          Nhấp vào ký tự để nghe phát âm
-        </p>
+        <p className="text-muted-foreground mb-4">Nhấp vào ký tự để nghe phát âm</p>
+        <Link
+          href="/alphabet/practice"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
+          <PenLine className="h-4 w-4" /> Luyện viết
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24 max-w-7xl mx-auto">
