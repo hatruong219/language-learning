@@ -9,10 +9,13 @@
 
 ```
 sites (web-mgmt-platform)
-  └── decks (nhóm từ vựng / topic)
-        └── vocabulary (từ vựng)
-              └── vocabulary_examples (câu ví dụ)
-              └── vocabulary_readings (cách đọc / furigana)
+  ├── decks (nhóm từ vựng / topic)
+  │     └── vocabulary (từ vựng)
+  │           └── vocabulary_examples (câu ví dụ)
+  └── mnn_lessons (bài học Minna no Nihongo)
+        ├── mnn_vocabulary (từ vựng từng bài)
+        ├── mnn_grammar (ngữ pháp từng bài)
+        └── mnn_exercises (bài tập từng bài)
 
 users (Supabase Auth)
   └── user_progress (tiến trình học từng từ)
@@ -147,6 +150,78 @@ users (Supabase Auth)
 
 ---
 
+---
+
+### `mnn_lessons` — Bài học Minna no Nihongo
+
+| Column | Type | Constraint | Mô tả |
+|--------|------|-----------|-------|
+| `id` | UUID | PK | |
+| `site_id` | UUID | FK → sites(id), NOT NULL | |
+| `lesson_number` | SMALLINT | NOT NULL | Số bài: 1, 2, 3... |
+| `title_vi` | TEXT | NOT NULL | はじめまして |
+| `situation_vi` | TEXT | | Tự giới thiệu bản thân |
+| `order_index` | SMALLINT | default 0 | |
+| `created_at` | TIMESTAMPTZ | default now() | |
+
+**UNIQUE:** `(site_id, lesson_number)`  
+**RLS:** Public read.
+
+---
+
+### `mnn_vocabulary` — Từ vựng từng bài MNN
+
+| Column | Type | Constraint | Mô tả |
+|--------|------|-----------|-------|
+| `id` | UUID | PK | |
+| `site_id` | UUID | FK → sites(id), NOT NULL | |
+| `lesson_id` | UUID | FK → mnn_lessons(id) ON DELETE CASCADE | |
+| `word` | TEXT | NOT NULL | 行きます |
+| `reading` | TEXT | | いきます |
+| `romanization` | TEXT | | ikimasu |
+| `meaning_vi` | TEXT | NOT NULL | Đi (đến nơi nào đó) |
+| `part_of_speech` | TEXT | | 動詞, 名詞, 助詞... |
+| `order_index` | SMALLINT | default 0 | |
+
+**RLS:** Public read.
+
+---
+
+### `mnn_grammar` — Ngữ pháp từng bài MNN
+
+| Column | Type | Constraint | Mô tả |
+|--------|------|-----------|-------|
+| `id` | UUID | PK | |
+| `site_id` | UUID | FK → sites(id), NOT NULL | |
+| `lesson_id` | UUID | FK → mnn_lessons(id) ON DELETE CASCADE | |
+| `pattern` | TEXT | NOT NULL | 〜へ行きます/来ます/帰ります |
+| `explanation_vi` | TEXT | NOT NULL | Giải thích bằng tiếng Việt |
+| `example_ja` | TEXT | | Câu ví dụ tiếng Nhật |
+| `example_vi` | TEXT | | Dịch câu ví dụ |
+| `order_index` | SMALLINT | default 0 | |
+
+**RLS:** Public read.
+
+---
+
+### `mnn_exercises` — Bài tập từng bài MNN
+
+| Column | Type | Constraint | Mô tả |
+|--------|------|-----------|-------|
+| `id` | UUID | PK | |
+| `site_id` | UUID | FK → sites(id), NOT NULL | |
+| `lesson_id` | UUID | FK → mnn_lessons(id) ON DELETE CASCADE | |
+| `type` | TEXT | CHECK IN ('fill_blank','multiple_choice') | |
+| `question` | TEXT | NOT NULL | Câu hỏi (dùng `___` cho fill_blank) |
+| `options` | JSONB | nullable | Multiple choice: `["A","B","C","D"]` |
+| `answer` | TEXT | NOT NULL | Đáp án đúng |
+| `explanation_vi` | TEXT | | Giải thích tại sao đúng |
+| `order_index` | SMALLINT | default 0 | |
+
+**RLS:** Public read.
+
+---
+
 ### `user_progress` — Tiến trình học (Phase 2 — cần auth)
 
 | Column | Type | Constraint | Mô tả |
@@ -191,8 +266,9 @@ users (Supabase Auth)
 -- 3. vocabulary_examples
 -- 4. alphabet_characters
 -- 5. writing_prompts + writing_submissions
--- 6. user_progress (sau khi có auth)
--- 7. study_sessions (sau khi có user_progress)
+-- 6. mnn_lessons + mnn_vocabulary + mnn_grammar + mnn_exercises  ← 20260508000001
+-- 7. user_progress (sau khi có auth)
+-- 8. study_sessions (sau khi có user_progress)
 ```
 
 ---
