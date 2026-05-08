@@ -308,6 +308,137 @@ export interface Database {
           created_at?: string
         }
       }
+      mnn_lessons: {
+        Row: {
+          id: string
+          site_id: string
+          lesson_number: number
+          title_vi: string
+          situation_vi: string | null
+          order_index: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          site_id: string
+          lesson_number: number
+          title_vi: string
+          situation_vi?: string | null
+          order_index?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          site_id?: string
+          lesson_number?: number
+          title_vi?: string
+          situation_vi?: string | null
+          order_index?: number
+          created_at?: string
+        }
+      }
+      mnn_vocabulary: {
+        Row: {
+          id: string
+          site_id: string
+          lesson_id: string
+          word: string
+          reading: string | null
+          romanization: string | null
+          meaning_vi: string
+          part_of_speech: string | null
+          order_index: number
+        }
+        Insert: {
+          id?: string
+          site_id: string
+          lesson_id: string
+          word: string
+          reading?: string | null
+          romanization?: string | null
+          meaning_vi: string
+          part_of_speech?: string | null
+          order_index?: number
+        }
+        Update: {
+          id?: string
+          site_id?: string
+          lesson_id?: string
+          word?: string
+          reading?: string | null
+          romanization?: string | null
+          meaning_vi?: string
+          part_of_speech?: string | null
+          order_index?: number
+        }
+      }
+      mnn_grammar: {
+        Row: {
+          id: string
+          site_id: string
+          lesson_id: string
+          pattern: string
+          explanation_vi: string
+          example_ja: string | null
+          example_vi: string | null
+          order_index: number
+        }
+        Insert: {
+          id?: string
+          site_id: string
+          lesson_id: string
+          pattern: string
+          explanation_vi: string
+          example_ja?: string | null
+          example_vi?: string | null
+          order_index?: number
+        }
+        Update: {
+          id?: string
+          site_id?: string
+          lesson_id?: string
+          pattern?: string
+          explanation_vi?: string
+          example_ja?: string | null
+          example_vi?: string | null
+          order_index?: number
+        }
+      }
+      mnn_exercises: {
+        Row: {
+          id: string
+          site_id: string
+          lesson_id: string
+          type: 'fill_blank' | 'multiple_choice'
+          question: string
+          options: string[] | null
+          answer: string
+          explanation_vi: string | null
+          order_index: number
+        }
+        Insert: {
+          id?: string
+          site_id: string
+          lesson_id: string
+          type: 'fill_blank' | 'multiple_choice'
+          question: string
+          options?: string[] | null
+          answer: string
+          explanation_vi?: string | null
+          order_index?: number
+        }
+        Update: {
+          id?: string
+          site_id?: string
+          lesson_id?: string
+          type?: 'fill_blank' | 'multiple_choice'
+          question?: string
+          options?: string[] | null
+          answer?: string
+          explanation_vi?: string | null
+          order_index?: number
+        }
+      }
       writing_submissions: {
         Row: {
           id: string
@@ -407,4 +538,16 @@ export type VocabularyWithExamples = Vocabulary & {
 
 export type DeckWithCount = Deck & {
   vocabulary_count: number
+}
+
+// Minna no Nihongo
+export type MnnLesson     = Database['public']['Tables']['mnn_lessons']['Row']
+export type MnnVocabulary = Database['public']['Tables']['mnn_vocabulary']['Row']
+export type MnnGrammar    = Database['public']['Tables']['mnn_grammar']['Row']
+export type MnnExercise   = Database['public']['Tables']['mnn_exercises']['Row']
+
+export type MnnLessonFull = MnnLesson & {
+  mnn_vocabulary: MnnVocabulary[]
+  mnn_grammar: MnnGrammar[]
+  mnn_exercises: MnnExercise[]
 }

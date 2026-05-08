@@ -16,7 +16,10 @@
 ├── /flashcard                     ← Học flashcard (random toàn bộ)
 │   └── /flashcard/[deck-slug]     ← Flashcard theo deck
 ├── /alphabet                      ← Bảng chữ cái Hiragana + Katakana
+│   └── /alphabet/practice         ← Luyện viết/nhận dạng kana
 ├── /writing-test                  ← Luyện viết, AI chấm điểm
+├── /lessons                       ← みんなの日本語 — danh sách bài
+│   └── /lessons/[lesson_number]   ← Chi tiết bài (từ vựng + ngữ pháp + bài tập)
 ├── /quiz                          ← Quiz mode (Phase 2)
 └── /profile                       ← Tiến trình cá nhân (Phase 2)
 ```

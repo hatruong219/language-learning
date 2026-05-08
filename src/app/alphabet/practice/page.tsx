@@ -18,6 +18,7 @@ export default async function AlphabetPracticePage() {
     .select('*')
     .eq('language_code', 'ja')
     .in('script', ['hiragana', 'katakana'])
+    .lte('order_index', 46)
     .order('order_index')
 
   const characters = (data ?? []) as AlphabetCharacter[]

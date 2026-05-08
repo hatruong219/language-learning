@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookOpen, Layers, Zap, Grid3x3, Menu, MessageCircle, PenLine } from 'lucide-react'
+import { BookOpen, Layers, Zap, Grid3x3, Menu, MessageCircle, PenLine, BookMarked } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 const NAV_LINKS = [
   { href: '/vocabulary', label: 'Từ vựng', icon: BookOpen },
   { href: '/decks', label: 'Chủ đề', icon: Layers },
+  { href: '/lessons', label: 'Minano Nihongo', icon: BookMarked },
   { href: '/flashcard', label: 'Flashcard', icon: Zap },
   { href: '/writing-test', label: 'Luyện viết', icon: PenLine },
   { href: '/alphabet', label: 'Bảng chữ', icon: Grid3x3 },
