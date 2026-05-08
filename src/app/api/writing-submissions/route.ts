@@ -30,17 +30,19 @@ export async function POST(req: Request) {
     // Neu co prompt_id UUID hop le thi fetch them tu DB
     let promptVi = clientPromptVi
     let minWords = clientMinWords ?? 50
+    let jlptLevel: string | null = null
     const isFallback = !prompt_id || prompt_id === 'fallback'
 
     if (!isFallback) {
       const { data: promptData } = await supabase
         .from('writing_prompts')
-        .select('prompt_vi, min_words')
+        .select('prompt_vi, min_words, jlpt_level')
         .eq('id', prompt_id)
-        .single() as { data: Pick<WritingPrompt, 'prompt_vi' | 'min_words'> | null; error: unknown }
+        .single() as { data: Pick<WritingPrompt, 'prompt_vi' | 'min_words' | 'jlpt_level'> | null; error: unknown }
       if (promptData) {
         promptVi = promptData.prompt_vi
         minWords = promptData.min_words
+        jlptLevel = promptData.jlpt_level ?? null
       }
     }
 
@@ -64,7 +66,7 @@ export async function POST(req: Request) {
       submissionId = submission?.id ?? null
     }
 
-    const grading = await gradeWritingWithGroq(promptVi, response.trim(), minWords)
+    const grading = await gradeWritingWithGroq(promptVi, response.trim(), minWords, jlptLevel)
 
     if (submissionId) {
       await supabase
@@ -87,7 +89,8 @@ export async function POST(req: Request) {
       ...grading,
     })
   } catch (err) {
-    console.error('Writing submission error:', err)
-    return NextResponse.json({ error: 'Co loi xay ra, vui long thu lai.' }, { status: 500 })
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('Writing submission error:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

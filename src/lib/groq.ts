@@ -2,8 +2,48 @@ import type { GradingResult } from '@/types/database'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
-function buildGradingPrompt(prompt_vi: string, response: string, min_words: number): string {
-  return `Bạn là giáo viên tiếng Nhật chuyên nghiệp. Nhiệm vụ của bạn là chấm bài viết tiếng Nhật của học sinh.
+const JLPT_CRITERIA: Record<string, string> = {
+  N5: `Trình độ N5 (sơ cấp):
+- Ngữ pháp: Chấp nhận câu đơn giản, ます/です form đúng, trợ từ cơ bản (は、が、を、に、で) đúng. Bỏ qua lỗi kanji (dùng hiragana thay kanji là chấp nhận được).
+- Từ vựng: Dùng từ N5 đơn giản là đủ. Không yêu cầu từ phức tạp.
+- Nội dung: Chỉ cần đề cập đúng chủ đề, không cần lập luận sâu.
+- Tiêu chuẩn điểm cao (≥80): Câu đúng ngữ pháp, đề cập đủ ý.`,
+
+  N4: `Trình độ N4 (sơ-trung cấp):
+- Ngữ pháp: Kỳ vọng dùng được て-form, ~ています, ~たい, ~から/~ので, ~たことがある. Kanji N5 cơ bản phải đúng.
+- Từ vựng: Nên có từ N4, tránh chỉ dùng N5 đơn thuần.
+- Nội dung: Cần có ít nhất 2-3 ý rõ ràng liên quan đề bài.
+- Tiêu chuẩn điểm cao (≥80): Câu phức có liên kết logic, ít lỗi cơ bản.`,
+
+  N3: `Trình độ N3 (trung cấp):
+- Ngữ pháp: Kỳ vọng câu phức, passive/causative cơ bản, ~と思います、~ために、~ながら、~ので và các mẫu N3. Kanji N4 trở xuống phải dùng đúng.
+- Từ vựng: Cần có từ N3, đa dạng cách diễn đạt, không lặp từ quá nhiều.
+- Nội dung: Cần lập luận có ví dụ cụ thể, không chỉ liệt kê.
+- Tiêu chuẩn điểm cao (≥80): Câu đa dạng, lập luận có chiều sâu, ít lỗi nghiêm trọng.`,
+
+  N2: `Trình độ N2 (trung-cao cấp):
+- Ngữ pháp: Yêu cầu mẫu câu N2 (~にもかかわらず、~に対して、~をめぐって、~に基づいて...), văn phong rõ ràng, cấu trúc đoạn văn chặt chẽ.
+- Từ vựng: Cần từ N2, sử dụng đúng văn cảnh. Tránh dùng từ quá đơn giản.
+- Nội dung: Lập luận phải có cấu trúc (mở đầu → thân → kết), dẫn chứng rõ ràng.
+- Tiêu chuẩn điểm cao (≥80): Văn phong mạch lạc, lập luận thuyết phục, gần như không lỗi cơ bản.`,
+
+  N1: `Trình độ N1 (cao cấp — tiêu chuẩn rất cao):
+- Ngữ pháp: Yêu cầu mẫu câu N1 phức tạp, keigo đúng chỗ, câu ghép tinh tế. Lỗi ngữ pháp cơ bản sẽ bị trừ điểm nặng.
+- Từ vựng: Bắt buộc có từ N1/N2, diễn đạt tinh tế, tránh lặp và dùng từ đơn giản. Cần thành ngữ hoặc cụm từ địa ký nếu phù hợp.
+- Nội dung: Phân tích sâu sắc, đa chiều, có tư duy phê phán. Chỉ đề cập bề mặt sẽ bị điểm thấp ngay cả khi ngữ pháp đúng.
+- Tiêu chuẩn điểm cao (≥80): Gần như hoàn hảo — cả ngữ pháp, từ vựng lẫn chiều sâu nội dung.`,
+}
+
+function buildGradingPrompt(
+  prompt_vi: string,
+  response: string,
+  min_words: number,
+  jlpt_level?: string | null,
+): string {
+  const level = jlpt_level ?? 'N5'
+  const criteria = JLPT_CRITERIA[level] ?? JLPT_CRITERIA['N5']
+
+  return `Bạn là giáo viên tiếng Nhật chuyên nghiệp. Hãy chấm bài viết theo đúng cấp độ ${level}.
 
 ĐỀ BÀI: ${prompt_vi}
 YÊU CẦU: Bài viết phải bằng tiếng Nhật, tối thiểu ${min_words} từ.
@@ -13,31 +53,28 @@ BÀI VIẾT CỦA HỌC SINH:
 ${response}
 """
 
-HƯỚNG DẪN CHẤM ĐIỂM:
-1. Kiểm tra xem bài có viết bằng tiếng Nhật không. Nếu KHÔNG phải tiếng Nhật (tiếng Việt, tiếng Anh, số, ký tự ngẫu nhiên...) → is_valid_lang = false, tất cả điểm = 0, giải thích trong feedback_vi.
-2. Nếu đúng tiếng Nhật, chấm theo 3 tiêu chí:
-   - score_grammar (0-40): Ngữ pháp, cấu trúc câu đúng
-   - score_vocab (0-30): Từ vựng phong phú, phù hợp
-   - score_content (0-30): Nội dung liên quan đến đề bài
-3. score = score_grammar + score_vocab + score_content (tổng 0-100)
-4. errors: Liệt kê tối đa 5 lỗi quan trọng nhất (nếu có)
-5. feedback_vi: Nhận xét tổng quan bằng tiếng Việt (2-4 câu), thân thiện và khuyến khích
+TIÊU CHUẨN CHẤM ĐIỂM CHO ${level}:
+${criteria}
 
-Hãy trả về JSON hợp lệ theo đúng format sau (không thêm markdown, không thêm text ngoài JSON):
+HƯỚNG DẪN:
+1. Nếu bài KHÔNG phải tiếng Nhật → is_valid_lang = false, tất cả điểm = 0.
+2. Nếu đúng tiếng Nhật, chấm theo 3 tiêu chí (áp dụng tiêu chuẩn ${level} ở trên):
+   - score_grammar (0-40)
+   - score_vocab (0-30)
+   - score_content (0-30)
+3. score = tổng 3 tiêu chí (0-100)
+4. errors: tối đa 5 lỗi quan trọng nhất
+5. feedback_vi: nhận xét 2-4 câu tiếng Việt, thân thiện, ghi rõ điểm cần cải thiện theo cấp ${level}
+
+Trả về JSON thuần (không markdown):
 {
   "is_valid_lang": true,
   "score_grammar": 30,
   "score_vocab": 22,
   "score_content": 25,
   "score": 77,
-  "feedback_vi": "Bài viết khá tốt, ngữ pháp cơ bản đúng. Cần bổ sung thêm tính từ mô tả.",
-  "errors": [
-    {
-      "original": "わたしはがくせいです",
-      "corrected": "わたしはがくせいです。",
-      "explanation_vi": "Cuối câu cần có dấu chấm 。"
-    }
-  ]
+  "feedback_vi": "...",
+  "errors": [{"original": "...", "corrected": "...", "explanation_vi": "..."}]
 }`
 }
 
@@ -51,7 +88,7 @@ function parseGroqResponse(data: unknown): GradingResult {
     throw new Error('Groq không trả về text.')
   }
 
-  const cleaned = text.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim()
+  const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
 
   let parsed: GradingResult
   try {
@@ -92,6 +129,7 @@ export async function gradeWritingWithGroq(
   prompt_vi: string,
   response: string,
   min_words: number,
+  jlpt_level?: string | null,
 ): Promise<GradingResult> {
   const apiKey = process.env.GROQ_API_KEY
   if (!apiKey) throw new Error('GROQ_API_KEY chưa được cấu hình')
@@ -99,7 +137,7 @@ export async function gradeWritingWithGroq(
   const primaryModel = process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile'
   const fallbackModel = process.env.GROQ_MODEL_FALLBACK ?? 'llama-3.1-8b-instant'
 
-  const prompt = buildGradingPrompt(prompt_vi, response, min_words)
+  const prompt = buildGradingPrompt(prompt_vi, response, min_words, jlpt_level)
 
   let res = await callGroq(apiKey, primaryModel, prompt)
 
