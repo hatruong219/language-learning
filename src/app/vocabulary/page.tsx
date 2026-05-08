@@ -32,7 +32,7 @@ export default async function VocabularyPage({
   // Build query
   let query = supabase
     .from('vocabulary')
-    .select('*, deck:decks(name, slug, emoji)', { count: 'exact' })
+    .select('id, word, reading, romanization, meaning_vi, jlpt_level, part_of_speech, deck:decks(name, slug, emoji)', { count: 'exact' })
     .eq('is_active', true)
     .order('order_index')
     .range(from, to)

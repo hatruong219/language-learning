@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { FlashCardSetup } from '@/components/flashcard/FlashCardSetup'
-import type { Deck, Vocabulary } from '@/types/database'
+import type { Deck } from '@/types/database'
 
+const JLPT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1'] as const
 
 export default async function FlashCardDeckPage({
   params,
@@ -14,7 +15,7 @@ export default async function FlashCardDeckPage({
 
   const { data: deckData } = await supabase
     .from('decks')
-    .select('*')
+    .select('id, name, slug, emoji')
     .eq('slug', slug)
     .single()
 
@@ -22,16 +23,26 @@ export default async function FlashCardDeckPage({
 
   const deck = deckData as unknown as Deck
 
-  const { data } = await supabase
+  const countPromises = JLPT_LEVELS.map((level) =>
+    supabase
+      .from('vocabulary')
+      .select('id', { count: 'exact', head: true })
+      .eq('deck_id', deck.id)
+      .eq('is_active', true)
+      .eq('jlpt_level', level),
+  )
+
+  const totalPromise = supabase
     .from('vocabulary')
-    .select('*')
+    .select('id', { count: 'exact', head: true })
     .eq('deck_id', deck.id)
     .eq('is_active', true)
-    .order('order_index')
 
-  const cards = (data ?? []) as unknown as Vocabulary[]
+  const [totalRes, ...levelResults] = await Promise.all([totalPromise, ...countPromises])
 
-  if (cards.length === 0) {
+  const totalAll = totalRes.count ?? 0
+
+  if (totalAll === 0) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
         <div className="text-center text-muted-foreground">
@@ -42,9 +53,15 @@ export default async function FlashCardDeckPage({
     )
   }
 
+  const totalByJlpt = Object.fromEntries(
+    JLPT_LEVELS.map((level, i) => [level, levelResults[i].count ?? 0]),
+  )
+
   return (
     <FlashCardSetup
-      cards={cards}
+      totalByJlpt={totalByJlpt}
+      totalAll={totalAll}
+      deckId={deck.id}
       deckName={`${deck.emoji ?? ''} ${deck.name}`}
       backHref={`/decks/${deck.slug}`}
     />

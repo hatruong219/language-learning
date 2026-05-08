@@ -1,43 +1,36 @@
 import { createClient } from '@/lib/supabase/server'
 import { FlashCardSetup } from '@/components/flashcard/FlashCardSetup'
-import type { Vocabulary } from '@/types/database'
-
 
 export const metadata = {
   title: 'Flashcard — Học tất cả từ vựng',
 }
 
+const JLPT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1'] as const
+
 export default async function FlashCardAllPage() {
   const supabase = await createClient()
+  const siteId = process.env.NEXT_PUBLIC_SITE_ID ?? ''
 
-  // Để tránh giới hạn 1000 rows mặc định của Supabase,
-  // fetch theo từng cấp JLPT (mỗi cấp < 1000) rồi gộp lại.
-  const levels = ['N5', 'N4', 'N3', 'N2', 'N1'] as const
-
-  const selectColumns =
-    'id, word, reading, romanization, meaning_vi, meaning_en, jlpt_level, part_of_speech'
-
-  const levelPromises = levels.map((level) =>
+  const countPromises = JLPT_LEVELS.map((level) =>
     supabase
       .from('vocabulary')
-      .select(selectColumns)
+      .select('id', { count: 'exact', head: true })
       .eq('is_active', true)
-      .eq('jlpt_level', level)
-      .order('order_index'),
+      .eq('site_id', siteId)
+      .eq('jlpt_level', level),
   )
 
-  const otherPromise = supabase
+  const totalPromise = supabase
     .from('vocabulary')
-    .select(selectColumns)
+    .select('id', { count: 'exact', head: true })
     .eq('is_active', true)
-    .is('jlpt_level', null)
-    .order('order_index')
+    .eq('site_id', siteId)
 
-  const results = await Promise.all([...levelPromises, otherPromise])
+  const [totalRes, ...levelResults] = await Promise.all([totalPromise, ...countPromises])
 
-  const cards = results.flatMap((res) => (res.data ?? [])) as Vocabulary[]
+  const totalAll = totalRes.count ?? 0
 
-  if (cards.length === 0) {
+  if (totalAll === 0) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-3.5rem)]">
         <div className="text-center text-muted-foreground">
@@ -48,9 +41,14 @@ export default async function FlashCardAllPage() {
     )
   }
 
+  const totalByJlpt = Object.fromEntries(
+    JLPT_LEVELS.map((level, i) => [level, levelResults[i].count ?? 0]),
+  )
+
   return (
     <FlashCardSetup
-      cards={cards}
+      totalByJlpt={totalByJlpt}
+      totalAll={totalAll}
       deckName="Tất cả từ vựng"
       backHref="/decks"
     />
