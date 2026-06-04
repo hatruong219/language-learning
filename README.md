@@ -7,6 +7,7 @@ A full-stack Japanese language learning web app with vocabulary management, inte
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38BDF8?logo=tailwindcss)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase)
 ![Groq](https://img.shields.io/badge/AI-Groq%20LLM-FF6B35)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-study.truongha.com-blue?logo=vercel)](https://study.truongha.com/)
 
 ---
 
