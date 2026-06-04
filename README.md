@@ -1,91 +1,111 @@
-## 日本語を学ぼう — Language Learning App
+# 日本語を学ぼう — Japanese Learning Platform
 
-Ứng dụng web học tiếng Nhật với từ vựng, flashcard, bảng chữ cái, luyện viết và chấm điểm tự động bằng AI.
+A full-stack Japanese language learning web app with vocabulary management, interactive flashcards, alphabet reference, AI-powered writing assessment, and text-to-speech — built with Next.js 16, Supabase, and Groq LLM.
 
-### Tech stack
-- **Frontend**: Next.js 16 (App Router), TypeScript strict, Tailwind CSS v4, shadcn/ui, framer-motion
-- **Backend / Data**: Supabase (PostgreSQL)
-- **AI**: Groq API — `llama-3.3-70b-versatile` (fallback: `llama-3.1-8b-instant`)
-- **TTS**: Web Speech API (browser native)
-
----
-
-### Tính năng chính
-
-- **Từ vựng** — Danh sách, filter theo deck / JLPT / search, chi tiết từ với furigana, TTS, câu ví dụ.
-- **Flashcard** — Học toàn bộ hoặc theo deck, chọn số lượng thẻ, lọc JLPT, flip animation, auto-play TTS, phím tắt.
-- **Chủ đề (Decks)** — Grid deck với emoji, mô tả, số từ, nút học ngay.
-- **Bảng chữ cái** — Hiragana + Katakana theo hàng, click nghe phát âm.
-- **Luyện viết** — Nhận đề ngẫu nhiên, nộp bài viết tiếng Nhật, AI chấm điểm grammar/vocab/content và đưa ra nhận xét chi tiết.
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38BDF8?logo=tailwindcss)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase)
+![Groq](https://img.shields.io/badge/AI-Groq%20LLM-FF6B35)
 
 ---
 
-### Routes đã implement
+## Features
 
-| Route | Mô tả |
-|-------|-------|
-| `/` | Home: hero, stats, decks nổi bật, từ ngẫu nhiên |
-| `/vocabulary` | Danh sách từ vựng, filter, pagination |
-| `/vocabulary/[id]` | Chi tiết từ: furigana, TTS, câu ví dụ |
-| `/decks` | Danh sách tất cả deck |
-| `/decks/[slug]` | Từ trong deck + nút học flashcard |
-| `/flashcard` | Flashcard random toàn bộ |
-| `/flashcard/[slug]` | Flashcard theo deck |
-| `/alphabet` | Bảng Hiragana + Katakana với popup TTS |
-| `/writing-test` | Luyện viết: đề ngẫu nhiên, nộp bài, AI chấm điểm |
+| Feature | Description |
+|---------|-------------|
+| **Vocabulary Browser** | Browse, filter by deck / JLPT level / keyword, paginated list with furigana readings |
+| **Word Detail** | Furigana, native TTS pronunciation, example sentences |
+| **Flashcards** | Study by deck or random pool — flip animation, auto-play audio, keyboard shortcuts, JLPT filter, card count selector |
+| **Deck Management** | Organized vocabulary decks with emoji, descriptions, and word counts |
+| **Alphabet Reference** | Full Hiragana & Katakana chart — click any character to hear pronunciation |
+| **AI Writing Test** | Receive a random Japanese writing prompt, submit your answer, get AI-graded feedback on grammar, vocabulary, and content |
 
 ---
 
-### Chạy local
+## Tech Stack
 
-Yêu cầu: Node.js LTS, `pnpm`.
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router, React Server Components) |
+| Language | TypeScript (strict mode) |
+| Styling | Tailwind CSS v4 + shadcn/ui + framer-motion |
+| Database | Supabase (PostgreSQL) |
+| AI Grading | Groq API — `llama-3.3-70b-versatile` (fallback: `llama-3.1-8b-instant`) |
+| TTS | Web Speech API (browser-native, zero cost) |
+| Forms | react-hook-form + Zod validation |
+| Deployment | Vercel |
+
+---
+
+## Routes
+
+| Route | Description |
+|-------|-------------|
+| `/` | Home — hero section, site stats, featured decks, random word highlight |
+| `/vocabulary` | Vocabulary list with deck / JLPT / search filters + pagination |
+| `/vocabulary/[id]` | Word detail: furigana, TTS button, example sentences |
+| `/decks` | All decks grid |
+| `/decks/[slug]` | Words in deck + start flashcard button |
+| `/flashcard` | Random flashcard session (all vocabulary) |
+| `/flashcard/[slug]` | Flashcard session for a specific deck |
+| `/alphabet` | Hiragana & Katakana reference with click-to-listen |
+| `/writing-test` | AI writing assessment — prompt → submission → graded feedback |
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/                      ← App Router pages & API routes
+├── components/               ← UI components (PascalCase.tsx)
+├── lib/
+│   ├── supabase/             ← client.ts (browser) · server.ts (RSC)
+│   ├── tts.ts                ← Web Speech API wrapper
+│   └── flashcard-utils.ts    ← Shuffle logic + state reducer
+├── types/database.ts         ← Supabase table types
+supabase/
+└── migrations/               ← Ordered SQL migrations
+```
+
+**Database tables:** `sites`, `decks`, `vocabulary`, `vocabulary_examples`, `alphabet_characters`, `writing_prompts`, `writing_submissions`, `user_progress`, `study_sessions`
+
+---
+
+## Getting Started
+
+**Prerequisites:** Node.js LTS, `pnpm`
 
 ```bash
 pnpm install
-cp .env.example .env.local  # điền các env vars bên dưới
+cp .env.example .env.local
+# Fill in the env vars below, then:
 pnpm dev
 ```
 
-Ứng dụng chạy tại `http://localhost:3000`.
+App runs at `http://localhost:3000`.
 
----
-
-### Biến môi trường
+### Environment Variables
 
 ```bash
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_SITE_ID=   # UUID của site trong bảng sites
+NEXT_PUBLIC_SITE_ID=        # UUID of your site row in the `sites` table
 
-# Groq — chấm bài viết tự động
-# Lấy key tại: https://console.groq.com/keys
+# Groq — AI writing grader
+# Get your key at: https://console.groq.com/keys
 GROQ_API_KEY=
 ```
 
 ---
 
-### Cấu trúc chính
+## Roadmap
 
-```
-src/
-├── app/                      ← App Router pages
-├── components/               ← UI components (PascalCase.tsx)
-├── lib/
-│   ├── supabase/             ← client.ts / server.ts
-│   ├── groq.ts               ← AI grading (Groq API)
-│   ├── tts.ts                ← Web Speech API wrapper
-│   └── flashcard-utils.ts    ← Shuffle + state machine
-├── types/database.ts         ← Supabase table types
-supabase/migrations/          ← SQL migrations theo thứ tự
-```
-
-Database tables: `decks`, `vocabulary`, `vocabulary_examples`, `alphabet_characters`, `writing_prompts`, `writing_submissions`, `user_progress`, `study_sessions`
-
----
-
-### Roadmap
-- Seed đủ bộ từ JLPT N5–N4 (~800–1500 từ)
-- Quiz mode `/quiz`
-- User progress tracking (cần auth)
-- Spaced repetition
+- [ ] Full JLPT N5–N4 vocabulary seed (~800–1500 words)
+- [ ] Quiz mode `/quiz`
+- [ ] User authentication + progress tracking
+- [ ] Spaced repetition algorithm
+- [ ] Multi-language support (Korean, Chinese)
