@@ -33,13 +33,14 @@ function ColumnToggle({ hidden, onToggle }: { hidden: boolean; onToggle: () => v
 }
 
 export function VocabSection({ vocabulary }: { vocabulary: MnnVocabulary[] }) {
+  const [hideWord, setHideWord] = useState(false)
   const [hideRomaji, setHideRomaji] = useState(false)
   const [hideMeaning, setHideMeaning] = useState(false)
 
   return (
     <div className="space-y-3">
       <h3 className="text-base font-semibold">Từ vựng ({vocabulary.length} từ)</h3>
-      <div className="rounded-xl border overflow-hidden">
+      <div className="rounded-xl border">
         <table className="w-full text-sm table-fixed">
           <colgroup>
             <col style={{ width: 40 }} />
@@ -49,20 +50,23 @@ export function VocabSection({ vocabulary }: { vocabulary: MnnVocabulary[] }) {
             <col style={{ width: 100 }} />
             <col style={{ width: 48 }} />
           </colgroup>
-          <thead className="bg-muted/60">
+          <thead className="sticky top-14 z-10">
             <tr>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">#</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">Chữ</th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground hidden sm:table-cell">
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground bg-muted">#</th>
+              <th className="text-left px-5 py-3 font-medium text-muted-foreground bg-muted">
+                <span>Chữ</span>
+                <ColumnToggle hidden={hideWord} onToggle={() => setHideWord((v) => !v)} />
+              </th>
+              <th className="text-left px-5 py-3 font-medium text-muted-foreground bg-muted hidden sm:table-cell">
                 <span>Romaji</span>
                 <ColumnToggle hidden={hideRomaji} onToggle={() => setHideRomaji((v) => !v)} />
               </th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground">
+              <th className="text-left px-5 py-3 font-medium text-muted-foreground bg-muted">
                 <span>Nghĩa</span>
                 <ColumnToggle hidden={hideMeaning} onToggle={() => setHideMeaning((v) => !v)} />
               </th>
-              <th className="text-left px-5 py-3 font-medium text-muted-foreground hidden md:table-cell">Loại từ</th>
-              <th className="px-3 py-3" />
+              <th className="text-left px-5 py-3 font-medium text-muted-foreground bg-muted hidden md:table-cell">Loại từ</th>
+              <th className="px-3 py-3 bg-muted" />
             </tr>
           </thead>
           <tbody>
@@ -70,12 +74,15 @@ export function VocabSection({ vocabulary }: { vocabulary: MnnVocabulary[] }) {
               <tr key={v.id} className="border-t hover:bg-muted/30 transition-colors">
                 <td className="px-4 py-3.5 text-muted-foreground">{i + 1}</td>
                 <td className="px-5 py-3.5">
-                  <div>
-                    <span className="font-japanese text-lg font-medium">{v.word}</span>
-                    {v.reading && v.reading !== v.word && (
-                      <span className="text-xs text-muted-foreground ml-1.5">({v.reading})</span>
-                    )}
-                  </div>
+                  {hideWord
+                    ? <span className="text-muted-foreground/30 select-none">———</span>
+                    : <div>
+                        <span className="font-japanese text-lg font-medium">{v.word}</span>
+                        {v.reading && v.reading !== v.word && (
+                          <span className="text-xs text-muted-foreground ml-1.5">({v.reading})</span>
+                        )}
+                      </div>
+                  }
                 </td>
                 <td className="px-5 py-3.5 hidden sm:table-cell">
                   {hideRomaji
