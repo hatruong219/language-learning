@@ -13,8 +13,16 @@ export function Footer() {
           <span className="hidden sm:inline-block">Học Tiếng Nhật mỗi ngày</span>
         </div>
 
-        <div className="flex items-center gap-6">
-          <p>© {currentYear} Bản quyền thuộc về tác giả.</p>
+        <div className="flex items-center gap-1">
+          <span>© {currentYear} Created by</span>
+          <a
+            href="https://www.truongha.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-foreground hover:underline underline-offset-4 transition-colors"
+          >
+            Truong H.A
+          </a>
         </div>
       </div>
     </footer>
