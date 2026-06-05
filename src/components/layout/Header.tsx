@@ -2,11 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-<<<<<<< Updated upstream
-import { BookOpen, Layers, Zap, Grid3x3, Menu, MessageCircle, PenLine, BookMarked } from 'lucide-react'
-=======
-import { BookOpen, Layers, Zap, Grid3x3, Menu, PenLine } from 'lucide-react'
->>>>>>> Stashed changes
+import { BookOpen, Layers, Zap, Grid3x3, Menu, PenLine, BookMarked } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
