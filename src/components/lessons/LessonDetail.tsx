@@ -5,19 +5,18 @@ import { cn } from '@/lib/utils'
 import { VocabSection } from './VocabSection'
 import { GrammarSection } from './GrammarSection'
 import { ExerciseSession, type ExerciseItem, type ExerciseResult } from './ExerciseSession'
-import { QuizSession } from '@/components/quiz/QuizSession'
 import { generateExercises } from '@/lib/grammar-quiz'
-import type { QuizWord } from '@/lib/quiz'
+import Link from 'next/link'
+import { Dumbbell } from 'lucide-react'
 import type { MnnLessonFull } from '@/types/database'
 import { CheckCircle, XCircle, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 
-type Tab = 'content' | 'words' | 'practice' | 'result'
+type Tab = 'content' | 'practice' | 'result'
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'content',  label: 'Nội dung' },
-  { key: 'words',    label: 'Kiểm tra từ' },
   { key: 'practice', label: 'Bài tập' },
   { key: 'result',   label: 'Kết quả' },
 ]
@@ -50,21 +49,9 @@ export function LessonDetail({ lesson }: { lesson: MnnLessonFull }) {
     return [...authored, ...generateExercises(lesson.mnn_sentences, need)]
   }, [lesson.mnn_exercises, lesson.mnn_sentences])
 
-  /** Từ của bài này, đưa vào bộ luyện tập dùng chung. */
-  const quizWords = useMemo<QuizWord[]>(
-    () =>
-      lesson.mnn_vocabulary
-        .filter((v) => v.reading && v.meaning_vi)
-        .map((v) => ({
-          id: `mnn-${v.id}`,
-          // Ưu tiên dạng kanji nếu từ có — hai dạng đề 漢字読み và 表記 chỉ
-          // dựng được khi từ viết bằng chữ Hán.
-          word: v.kanji || v.word,
-          reading: v.reading ?? v.word,
-          meaning: v.meaning_vi,
-        })),
-    [lesson.mnn_vocabulary],
-  )
+  const wordCount = lesson.mnn_vocabulary.filter(
+    (v) => v.reading && v.meaning_vi,
+  ).length
 
   function handleExerciseDone(r: ExerciseResult[]) {
     setResults(r)
@@ -106,19 +93,27 @@ export function LessonDetail({ lesson }: { lesson: MnnLessonFull }) {
       {/* Tab content */}
       {tab === 'content' && (
         <div className="space-y-8">
+          {wordCount > 0 && (
+            // Kiểm tra từ nằm ở trang RIÊNG chứ không phải tab ở đây: kiểm
+            // từng bài một thì không bao giờ ôn chéo được, mà đề thi không hỏi
+            // theo bài. Vào từ đây thì bài này được chọn sẵn, muốn thêm bài
+            // khác thì tick thêm.
+            <Link
+              href={`/lessons/practice?lessons=${lesson.lesson_number}`}
+              className="flex items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 hover:bg-accent transition-colors"
+            >
+              <span className="flex items-center gap-2 text-sm font-medium">
+                <Dumbbell className="h-4 w-4" />
+                Kiểm tra {wordCount} từ của bài này
+              </span>
+              <span className="text-xs text-muted-foreground">
+                chọn thêm bài khác được →
+              </span>
+            </Link>
+          )}
           <VocabSection vocabulary={lesson.mnn_vocabulary} />
           <GrammarSection grammar={lesson.mnn_grammar} />
         </div>
-      )}
-
-      {tab === 'words' && (
-        quizWords.length === 0 ? (
-          <p className="text-center py-12 text-sm text-muted-foreground">
-            Bài này chưa có từ vựng để kiểm tra.
-          </p>
-        ) : (
-          <QuizSession words={quizWords} />
-        )
       )}
 
       {tab === 'practice' && (
