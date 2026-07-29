@@ -5,26 +5,60 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Search, X } from 'lucide-react'
-import { useCallback, useTransition } from 'react'
-
-interface Deck {
-  id: string
-  name: string
-  slug: string
-  emoji: string | null
-}
+import { useCallback, useEffect, useTransition } from 'react'
 
 interface VocabularyFiltersProps {
-  decks: Deck[]
-  currentParams: { deck?: string; jlpt?: string; q?: string }
+  currentParams: { jlpt?: string; q?: string }
 }
 
 const JLPT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
-export function VocabularyFilters({ decks, currentParams }: VocabularyFiltersProps) {
+/**
+ * Nhớ bộ lọc lần trước cho màn hình khỏi trống lúc quay lại.
+ *
+ * CHỈ nhớ bộ lọc — không lưu tiến độ học. Đây là trạng thái giao diện, không
+ * phải kết quả học.
+ */
+const FILTER_KEY = 'vocabulary-filter'
+
+export function VocabularyFilters({ currentParams }: VocabularyFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
+
+  // Ghi lại mỗi lần bộ lọc đổi.
+  useEffect(() => {
+    const saved = JSON.stringify({
+      jlpt: currentParams.jlpt ?? '',
+      q: currentParams.q ?? '',
+    })
+    try {
+      window.localStorage.setItem(FILTER_KEY, saved)
+    } catch {
+      // Trình duyệt chặn localStorage (chế độ riêng tư) — bỏ qua, không phải
+      // lỗi người dùng cần biết.
+    }
+  }, [currentParams.jlpt, currentParams.q])
+
+  // Vào trang không kèm tham số nào thì khôi phục bộ lọc lần trước.
+  useEffect(() => {
+    if (searchParams.toString() !== '') return
+    try {
+      const raw = window.localStorage.getItem(FILTER_KEY)
+      if (!raw) return
+      const { jlpt, q } = JSON.parse(raw) as { jlpt?: string; q?: string }
+      if (!jlpt && !q) return
+      const next = new URLSearchParams()
+      if (jlpt) next.set('jlpt', jlpt)
+      if (q) next.set('q', q)
+      router.replace(`?${next.toString()}`)
+    } catch {
+      // JSON hỏng thì coi như chưa nhớ gì.
+    }
+    // Chỉ chạy một lần lúc vào trang trống — thêm phụ thuộc là nó tự chuyển
+    // hướng ngay sau khi người dùng chủ động xoá bộ lọc.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const updateParams = useCallback(
     (updates: Record<string, string | undefined>) => {
@@ -44,7 +78,7 @@ export function VocabularyFilters({ decks, currentParams }: VocabularyFiltersPro
     [router, searchParams],
   )
 
-  const hasFilters = currentParams.deck || currentParams.jlpt || currentParams.q
+  const hasFilters = currentParams.jlpt || currentParams.q
 
   return (
     <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -63,24 +97,6 @@ export function VocabularyFilters({ decks, currentParams }: VocabularyFiltersPro
           }}
         />
       </div>
-
-      {/* Deck filter */}
-      <Select
-        value={currentParams.deck ?? 'all'}
-        onValueChange={(v) => updateParams({ deck: v === 'all' ? undefined : v })}
-      >
-        <SelectTrigger className="w-full sm:w-48">
-          <SelectValue placeholder="Chủ đề" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Tất cả chủ đề</SelectItem>
-          {decks.map((deck) => (
-            <SelectItem key={deck.id} value={deck.id}>
-              {deck.emoji} {deck.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
 
       {/* JLPT filter */}
       <Select
@@ -105,7 +121,7 @@ export function VocabularyFilters({ decks, currentParams }: VocabularyFiltersPro
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => updateParams({ deck: undefined, jlpt: undefined, q: undefined })}
+          onClick={() => updateParams({ jlpt: undefined, q: undefined })}
           title="Xoá bộ lọc"
         >
           <X className="h-4 w-4" />

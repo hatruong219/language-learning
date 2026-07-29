@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookOpen, Layers, Zap, Grid3x3, Menu, PenLine, BookMarked } from 'lucide-react'
+import { BookOpen, Grid3x3, Menu, PenLine, BookMarked, Languages } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -11,9 +11,8 @@ import { SettingsMenu } from './SettingsMenu'
 
 const NAV_LINKS = [
   { href: '/vocabulary', label: 'Từ vựng', icon: BookOpen },
-  { href: '/decks', label: 'Chủ đề', icon: Layers },
   { href: '/lessons', label: 'Minano Nihongo', icon: BookMarked },
-  { href: '/flashcard', label: 'Flashcard', icon: Zap },
+  { href: '/kanji', label: 'Kanji', icon: Languages },
   { href: '/writing-test', label: 'Luyện viết', icon: PenLine },
   { href: '/alphabet', label: 'Bảng chữ', icon: Grid3x3 },
 ] as const

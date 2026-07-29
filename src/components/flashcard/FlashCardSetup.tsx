@@ -33,7 +33,7 @@ export function FlashCardSetup({
   totalAll,
   deckId,
   deckName,
-  backHref = '/decks',
+  backHref = '/vocabulary',
 }: FlashCardSetupProps) {
   const [selected, setSelected] = useState<number | null>(null)
   const [custom, setCustom] = useState('')

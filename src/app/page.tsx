@@ -1,10 +1,9 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { DeckCard } from '@/components/deck/DeckCard'
 import { WordCard } from '@/components/vocabulary/WordCard'
 import { Button } from '@/components/ui/button'
 import { Zap, BookOpen, Grid3x3 } from 'lucide-react'
-import type { DeckWithCount, VocabularyWithDeck } from '@/types/database'
+import type { VocabularyWithDeck } from '@/types/database'
 
 
 function pickDailyRandom<T>(items: T[], count: number): T[] {
@@ -37,18 +36,11 @@ export const revalidate = 60
 export default async function HomePage() {
   const supabase = await createClient()
 
-  const [decksRes, wordsRes, statsRes] = await Promise.all([
-    supabase
-      .from('decks')
-      .select('id, name, slug, emoji, description, order_index, is_public, vocabulary_count:vocabulary(count)')
-      .eq('is_public', true)
-      .order('order_index')
-      .limit(6),
-
+  const [wordsRes, statsRes, kanjiRes] = await Promise.all([
     supabase
       .from('vocabulary')
       .select(
-        'id, word, reading, romanization, meaning_vi, jlpt_level, part_of_speech, deck:decks(name, slug, emoji)',
+        'id, word, reading, romanization, meaning_vi, jlpt_level, part_of_speech',
       )
       .eq('is_active', true)
       .order('order_index')
@@ -58,16 +50,16 @@ export default async function HomePage() {
       .from('vocabulary')
       .select('count', { count: 'exact', head: true })
       .eq('is_active', true),
+
+    supabase
+      .from('jlpt_kanji_words')
+      .select('id', { count: 'exact', head: true }),
   ])
 
-  const decks = ((decksRes.data ?? []) as unknown as Record<string, unknown>[]).map((d) => ({
-    ...d,
-    vocabulary_count: (d.vocabulary_count as unknown as { count: number }[])[0]?.count ?? 0,
-  })) as DeckWithCount[]
-
-  const allWords = (wordsRes.data ?? []) as VocabularyWithDeck[]
+  const allWords = (wordsRes.data ?? []) as unknown as VocabularyWithDeck[]
   const words = pickDailyRandom(allWords, 3)
   const totalWords = statsRes.count ?? 0
+  const kanjiCount = kanjiRes.count ?? 0
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -82,7 +74,7 @@ export default async function HomePage() {
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Button asChild size="lg">
-            <Link href="/flashcard">
+            <Link href="/vocabulary/flashcard">
               <Zap className="mr-2 h-5 w-5" />
               Bắt đầu học
             </Link>
@@ -106,7 +98,7 @@ export default async function HomePage() {
       <section className="grid grid-cols-3 gap-4 mb-12 max-w-sm mx-auto">
         {[
           { label: 'Từ vựng', value: totalWords, emoji: '📖' },
-          { label: 'Chủ đề', value: decks.length, emoji: '📚' },
+          { label: 'Chữ Hán', value: kanjiCount, emoji: '🈶' },
           { label: 'Ngôn ngữ', value: 1, emoji: '🇯🇵' },
         ].map(({ label, value, emoji }) => (
           <div key={label} className="text-center p-4 rounded-xl border bg-card">
@@ -116,23 +108,6 @@ export default async function HomePage() {
           </div>
         ))}
       </section>
-
-      {/* Featured Decks */}
-      {decks.length > 0 && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Chủ đề học tập</h2>
-            <Link href="/decks" className="text-sm text-primary hover:underline">
-              Xem tất cả →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {decks.map((deck) => (
-              <DeckCard key={deck.id} deck={deck} />
-            ))}
-          </div>
-        </section>
-      )}
 
       {/* Today's words */}
       {words.length > 0 && (
@@ -145,7 +120,7 @@ export default async function HomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {words.map((word) => (
-              <WordCard key={word.id} word={word} showDeck />
+              <WordCard key={word.id} word={word} />
             ))}
           </div>
         </section>

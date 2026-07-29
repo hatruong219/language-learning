@@ -23,7 +23,7 @@ interface FlashCardDeckProps {
   backHref?: string
 }
 
-export function FlashCardDeck({ cards, deckName, backHref = '/decks' }: FlashCardDeckProps) {
+export function FlashCardDeck({ cards, deckName, backHref = '/vocabulary' }: FlashCardDeckProps) {
   const [state, dispatch] = useReducer(studyReducer, cards, createInitialState)
 
   const currentCard = state.cards[state.currentIndex]

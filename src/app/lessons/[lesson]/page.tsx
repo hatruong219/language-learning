@@ -32,7 +32,8 @@ export default async function LessonPage({ params }: Props) {
       *,
       mnn_vocabulary ( * ),
       mnn_grammar ( * ),
-      mnn_exercises ( * )
+      mnn_exercises ( * ),
+      mnn_sentences ( * )
     `)
     .eq('site_id', siteId)
     .eq('lesson_number', lessonNumber)

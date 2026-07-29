@@ -1,26 +1,70 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { VocabSection } from './VocabSection'
 import { GrammarSection } from './GrammarSection'
-import { ExerciseSession, type ExerciseResult } from './ExerciseSession'
+import { ExerciseSession, type ExerciseItem, type ExerciseResult } from './ExerciseSession'
+import { QuizSession } from '@/components/quiz/QuizSession'
+import { generateExercises } from '@/lib/grammar-quiz'
+import type { QuizWord } from '@/lib/quiz'
 import type { MnnLessonFull } from '@/types/database'
 import { CheckCircle, XCircle, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 
-type Tab = 'content' | 'practice' | 'result'
+type Tab = 'content' | 'words' | 'practice' | 'result'
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'content',  label: 'Nội dung' },
-  { key: 'practice', label: 'Thực hành' },
+  { key: 'words',    label: 'Kiểm tra từ' },
+  { key: 'practice', label: 'Bài tập' },
   { key: 'result',   label: 'Kết quả' },
 ]
+
+/** Số đề tối đa mỗi bài. Đủ để làm một lượt mà chưa mất kiên nhẫn. */
+const EXERCISE_LIMIT = 12
 
 export function LessonDetail({ lesson }: { lesson: MnnLessonFull }) {
   const [tab, setTab] = useState<Tab>('content')
   const [results, setResults] = useState<ExerciseResult[] | null>(null)
+
+  /**
+   * Đề VIẾT TAY trước, thiếu bao nhiêu mới sinh thêm từ câu ví dụ.
+   *
+   * `mnn_exercises` chỉ có bài 1–5 nên bài 6–50 trước đây mở tab này ra là
+   * trống. Đề viết tay chất lượng cao hơn nên dùng trước, `mnn_sentences` lấp
+   * phần còn lại — 1247 câu phủ đủ 50 bài.
+   */
+  const exercises = useMemo<ExerciseItem[]>(() => {
+    const authored: ExerciseItem[] = lesson.mnn_exercises.map((e) => ({
+      id: e.id,
+      type: e.type as 'fill_blank' | 'multiple_choice',
+      question: e.question,
+      options: Array.isArray(e.options) ? (e.options as string[]) : null,
+      answer: e.answer,
+      explanation_vi: e.explanation_vi,
+    }))
+    const need = EXERCISE_LIMIT - authored.length
+    if (need <= 0) return authored.slice(0, EXERCISE_LIMIT)
+    return [...authored, ...generateExercises(lesson.mnn_sentences, need)]
+  }, [lesson.mnn_exercises, lesson.mnn_sentences])
+
+  /** Từ của bài này, đưa vào bộ luyện tập dùng chung. */
+  const quizWords = useMemo<QuizWord[]>(
+    () =>
+      lesson.mnn_vocabulary
+        .filter((v) => v.reading && v.meaning_vi)
+        .map((v) => ({
+          id: `mnn-${v.id}`,
+          // Ưu tiên dạng kanji nếu từ có — hai dạng đề 漢字読み và 表記 chỉ
+          // dựng được khi từ viết bằng chữ Hán.
+          word: v.kanji || v.word,
+          reading: v.reading ?? v.word,
+          meaning: v.meaning_vi,
+        })),
+    [lesson.mnn_vocabulary],
+  )
 
   function handleExerciseDone(r: ExerciseResult[]) {
     setResults(r)
@@ -67,11 +111,27 @@ export function LessonDetail({ lesson }: { lesson: MnnLessonFull }) {
         </div>
       )}
 
+      {tab === 'words' && (
+        quizWords.length === 0 ? (
+          <p className="text-center py-12 text-sm text-muted-foreground">
+            Bài này chưa có từ vựng để kiểm tra.
+          </p>
+        ) : (
+          <QuizSession words={quizWords} />
+        )
+      )}
+
       {tab === 'practice' && (
-        <ExerciseSession
-          exercises={lesson.mnn_exercises}
-          onComplete={handleExerciseDone}
-        />
+        exercises.length === 0 ? (
+          <p className="text-center py-12 text-sm text-muted-foreground">
+            Bài này chưa có câu ví dụ nào dựng được thành bài tập.
+          </p>
+        ) : (
+          <ExerciseSession
+            exercises={exercises}
+            onComplete={handleExerciseDone}
+          />
+        )
       )}
 
       {tab === 'result' && (
