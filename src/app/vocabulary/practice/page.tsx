@@ -41,7 +41,24 @@ export default async function VocabularyPracticePage({
     )
   }
 
-  const { data } = await query
+  // Đếm THẬT trong phạm vi lọc, tách khỏi kho ra đề. Hiện số đã cắt như thể
+  // đó là tổng thì người dùng lọc N5 (nghìn từ) lại thấy "500 từ" và tưởng
+  // database thiếu.
+  let countQuery = supabase
+    .from('vocabulary')
+    .select('id', { count: 'exact', head: true })
+    .eq('is_active', true)
+    .eq('site_id', siteId)
+  if (params.jlpt) countQuery = countQuery.eq('jlpt_level', params.jlpt)
+  if (params.q?.trim()) {
+    const like = `%${params.q.trim()}%`
+    countQuery = countQuery.or(
+      `word.ilike.${like},reading.ilike.${like},meaning_vi.ilike.${like}`,
+    )
+  }
+
+  const [{ data }, countRes] = await Promise.all([query, countQuery])
+  const total = countRes.count ?? 0
 
   const rows = (data ?? []) as unknown as {
     id: string
@@ -77,8 +94,9 @@ export default async function VocabularyPracticePage({
       <div>
         <h1 className="text-2xl font-bold mb-1">Luyện tập từ vựng</h1>
         <p className="text-sm text-muted-foreground">
-          {words.length} từ trong phạm vi đang lọc
+          {total} từ trong phạm vi đang lọc
           {params.jlpt && ` · ${params.jlpt}`}
+          {total > words.length && ` · ra đề từ ${words.length} từ lấy ngẫu nhiên`}
         </p>
       </div>
 

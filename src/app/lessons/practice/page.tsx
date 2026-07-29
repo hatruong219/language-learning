@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { fetchAllRows } from '@/lib/supabase/fetch-all'
 import { LessonPractice } from '@/components/lessons/LessonPractice'
 import type { LessonWords } from '@/components/lessons/LessonPractice'
 
@@ -22,19 +23,32 @@ export default async function LessonPracticePage({
   const siteId = process.env.NEXT_PUBLIC_SITE_ID ?? ''
   const supabase = await createClient()
 
-  // Nạp HẾT từ vựng 50 bài một lần. Khoảng 2000 dòng, mỗi dòng vài trường —
-  // đổi lại chọn bài nào là ra đề ngay, không phải chờ mạng mỗi lần đổi.
+  // Nạp HẾT từ vựng 51 bài một lần — chọn bài nào là ra đề ngay, không phải
+  // chờ mạng mỗi lần đổi lựa chọn.
+  //
+  // PHẢI qua fetchAllRows: bảng này có 2201 dòng, mà PostgREST cắt ở 1000 và
+  // KHÔNG báo lỗi — gọi thẳng `.select()` thì mất 1201 từ một cách im lặng.
   const [lessonsRes, wordsRes] = await Promise.all([
     supabase
       .from('mnn_lessons')
       .select('id, lesson_number, title_vi')
       .eq('site_id', siteId)
       .order('lesson_number'),
-    supabase
-      .from('mnn_vocabulary')
-      .select('id, lesson_id, word, kanji, reading, meaning_vi')
-      .eq('site_id', siteId)
-      .order('order_index'),
+    fetchAllRows<{
+      id: string
+      lesson_id: string
+      word: string
+      kanji: string | null
+      reading: string | null
+      meaning_vi: string
+    }>((from, to) =>
+      supabase
+        .from('mnn_vocabulary')
+        .select('id, lesson_id, word, kanji, reading, meaning_vi')
+        .eq('site_id', siteId)
+        .order('order_index')
+        .range(from, to),
+    ),
   ])
 
   const lessons = (lessonsRes.data ?? []) as unknown as {
@@ -42,14 +56,7 @@ export default async function LessonPracticePage({
     lesson_number: number
     title_vi: string
   }[]
-  const words = (wordsRes.data ?? []) as unknown as {
-    id: string
-    lesson_id: string
-    word: string
-    kanji: string | null
-    reading: string | null
-    meaning_vi: string
-  }[]
+  const words = wordsRes.rows
 
   const byLesson = new Map(lessons.map((l) => [l.id, l.lesson_number]))
 
