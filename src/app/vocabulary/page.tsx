@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import { Dumbbell, Zap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { WordCard } from '@/components/vocabulary/WordCard'
 import { VocabularyFilters } from '@/components/vocabulary/VocabularyFilters'
@@ -6,7 +8,6 @@ import type { VocabularyWithDeck } from '@/types/database'
 const PAGE_SIZE = 24
 
 interface SearchParams {
-  deck?: string
   jlpt?: string
   q?: string
   page?: string
@@ -32,12 +33,11 @@ export default async function VocabularyPage({
   // Build query
   let query = supabase
     .from('vocabulary')
-    .select('id, word, reading, romanization, meaning_vi, jlpt_level, part_of_speech, deck:decks(name, slug, emoji)', { count: 'exact' })
+    .select('id, word, reading, romanization, meaning_vi, jlpt_level, part_of_speech', { count: 'exact' })
     .eq('is_active', true)
     .order('order_index')
     .range(from, to)
 
-  if (params.deck) query = query.eq('deck_id', params.deck)
   if (params.jlpt) query = query.eq('jlpt_level', params.jlpt)
 
   if (params.q) {
@@ -51,28 +51,44 @@ export default async function VocabularyPage({
     }
   }
 
-  const [wordsRes, decksRes] = await Promise.all([
-    query,
-    supabase
-      .from('decks')
-      .select('id, name, slug, emoji')
-      .eq('is_public', true)
-      .order('order_index'),
-  ])
+  const wordsRes = await query
 
-  const words = (wordsRes.data ?? []) as VocabularyWithDeck[]
+  const words = (wordsRes.data ?? []) as unknown as VocabularyWithDeck[]
   const totalCount = wordsRes.count ?? 0
   const totalPages = Math.ceil(totalCount / PAGE_SIZE)
-  const decks = decksRes.data ?? []
+
+  const modeQuery = new URLSearchParams(
+    Object.entries(params).filter(
+      ([k, v]) => v && k !== 'page',
+    ) as [string, string][],
+  ).toString()
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-1">Từ vựng tiếng Nhật</h1>
-        <p className="text-muted-foreground">{totalCount} từ</p>
+      <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold mb-1">Từ vựng tiếng Nhật</h1>
+          <p className="text-muted-foreground">{totalCount} từ</p>
+        </div>
+        {/* Hai chế độ ăn CHUNG bộ lọc đang xem — đang lọc N3 thì lật thẻ và
+            luyện tập đúng nhóm N3, không phải toàn bộ. */}
+        <div className="flex gap-2">
+          <Link
+            href={`/vocabulary/flashcard?${modeQuery}`}
+            className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium hover:bg-accent transition-colors"
+          >
+            <Zap className="h-4 w-4" /> Flashcard
+          </Link>
+          <Link
+            href={`/vocabulary/practice?${modeQuery}`}
+            className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium hover:bg-accent transition-colors"
+          >
+            <Dumbbell className="h-4 w-4" /> Luyện tập
+          </Link>
+        </div>
       </div>
 
-      <VocabularyFilters decks={decks} currentParams={params} />
+      <VocabularyFilters currentParams={params} />
 
       {words.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground">
@@ -82,7 +98,7 @@ export default async function VocabularyPage({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {words.map((word) => (
-            <WordCard key={word.id} word={word} showDeck />
+            <WordCard key={word.id} word={word} />
           ))}
         </div>
       )}

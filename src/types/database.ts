@@ -345,6 +345,7 @@ export interface Database {
           word: string
           reading: string | null
           romanization: string | null
+          kanji: string | null
           meaning_vi: string
           part_of_speech: string | null
           order_index: number
@@ -356,6 +357,7 @@ export interface Database {
           word: string
           reading?: string | null
           romanization?: string | null
+          kanji?: string | null
           meaning_vi: string
           part_of_speech?: string | null
           order_index?: number
@@ -367,6 +369,7 @@ export interface Database {
           word?: string
           reading?: string | null
           romanization?: string | null
+          kanji?: string | null
           meaning_vi?: string
           part_of_speech?: string | null
           order_index?: number
@@ -486,6 +489,156 @@ export interface Database {
           graded_at?: string | null
         }
       }
+      mnn_sentences: {
+        Row: {
+          id: string
+          site_id: string
+          lesson_id: string
+          grammar_id: string | null
+          ja_kanji: string
+          ja_kana: string
+          vi: string
+          has_furigana: boolean
+          source: string | null
+          order_index: number
+        }
+        Insert: {
+          id?: string
+          site_id: string
+          lesson_id: string
+          grammar_id?: string | null
+          ja_kanji: string
+          ja_kana: string
+          vi: string
+          has_furigana?: boolean
+          source?: string | null
+          order_index?: number
+        }
+        Update: {
+          id?: string
+          site_id?: string
+          lesson_id?: string
+          grammar_id?: string | null
+          ja_kanji?: string
+          ja_kana?: string
+          vi?: string
+          has_furigana?: boolean
+          source?: string | null
+          order_index?: number
+        }
+      }
+      jlpt_kanji_words: {
+        Row: {
+          id: string
+          site_id: string
+          order_index: number
+          word: string
+          han_viet: string
+          kana: string
+          meaning_vi: string
+          level: string
+          source: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          site_id: string
+          order_index: number
+          word: string
+          han_viet?: string
+          kana: string
+          meaning_vi?: string
+          level?: string
+          source?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          site_id?: string
+          order_index?: number
+          word?: string
+          han_viet?: string
+          kana?: string
+          meaning_vi?: string
+          level?: string
+          source?: string
+          created_at?: string
+        }
+      }
+      jlpt_kanji: {
+        Row: {
+          id: string
+          site_id: string
+          character: string
+          jlpt_level: string
+          jlpt_level_ref: string | null
+          in_course: boolean
+          kyujitai: string | null
+          on_readings: string[] | null
+          kun_readings: string[] | null
+          han_viet: string[] | null
+          han_viet_source: string | null
+          meaning_en: string[] | null
+          meaning_vi: string | null
+          meaning_vi_source: string | null
+          meaning_classic: string | null
+          stroke_count: number | null
+          school_grade: number | null
+          radical_number: number | null
+          frequency: number | null
+          parts: string[] | null
+          order_index: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          site_id: string
+          character: string
+          jlpt_level: string
+          jlpt_level_ref?: string | null
+          in_course?: boolean
+          kyujitai?: string | null
+          on_readings?: string[] | null
+          kun_readings?: string[] | null
+          han_viet?: string[] | null
+          han_viet_source?: string | null
+          meaning_en?: string[] | null
+          meaning_vi?: string | null
+          meaning_vi_source?: string | null
+          meaning_classic?: string | null
+          stroke_count?: number | null
+          school_grade?: number | null
+          radical_number?: number | null
+          frequency?: number | null
+          parts?: string[] | null
+          order_index?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          site_id?: string
+          character?: string
+          jlpt_level?: string
+          jlpt_level_ref?: string | null
+          in_course?: boolean
+          kyujitai?: string | null
+          on_readings?: string[] | null
+          kun_readings?: string[] | null
+          han_viet?: string[] | null
+          han_viet_source?: string | null
+          meaning_en?: string[] | null
+          meaning_vi?: string | null
+          meaning_vi_source?: string | null
+          meaning_classic?: string | null
+          stroke_count?: number | null
+          school_grade?: number | null
+          radical_number?: number | null
+          frequency?: number | null
+          parts?: string[] | null
+          order_index?: number
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -546,8 +699,13 @@ export type MnnVocabulary = Database['public']['Tables']['mnn_vocabulary']['Row'
 export type MnnGrammar    = Database['public']['Tables']['mnn_grammar']['Row']
 export type MnnExercise   = Database['public']['Tables']['mnn_exercises']['Row']
 
+export type MnnSentence   = Database['public']['Tables']['mnn_sentences']['Row']
+export type JlptKanjiWord = Database['public']['Tables']['jlpt_kanji_words']['Row']
+export type JlptKanji      = Database['public']['Tables']['jlpt_kanji']['Row']
+
 export type MnnLessonFull = MnnLesson & {
   mnn_vocabulary: MnnVocabulary[]
   mnn_grammar: MnnGrammar[]
   mnn_exercises: MnnExercise[]
+  mnn_sentences: MnnSentence[]
 }

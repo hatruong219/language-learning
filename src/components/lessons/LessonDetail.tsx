@@ -1,10 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { VocabSection } from './VocabSection'
 import { GrammarSection } from './GrammarSection'
-import { ExerciseSession, type ExerciseResult } from './ExerciseSession'
+import { ExerciseSession, type ExerciseItem, type ExerciseResult } from './ExerciseSession'
+import { generateExercises } from '@/lib/grammar-quiz'
+import Link from 'next/link'
+import { Dumbbell } from 'lucide-react'
 import type { MnnLessonFull } from '@/types/database'
 import { CheckCircle, XCircle, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -14,13 +17,41 @@ type Tab = 'content' | 'practice' | 'result'
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'content',  label: 'Nội dung' },
-  { key: 'practice', label: 'Thực hành' },
+  { key: 'practice', label: 'Bài tập' },
   { key: 'result',   label: 'Kết quả' },
 ]
+
+/** Số đề tối đa mỗi bài. Đủ để làm một lượt mà chưa mất kiên nhẫn. */
+const EXERCISE_LIMIT = 12
 
 export function LessonDetail({ lesson }: { lesson: MnnLessonFull }) {
   const [tab, setTab] = useState<Tab>('content')
   const [results, setResults] = useState<ExerciseResult[] | null>(null)
+
+  /**
+   * Đề VIẾT TAY trước, thiếu bao nhiêu mới sinh thêm từ câu ví dụ.
+   *
+   * `mnn_exercises` chỉ có bài 1–5 nên bài 6–50 trước đây mở tab này ra là
+   * trống. Đề viết tay chất lượng cao hơn nên dùng trước, `mnn_sentences` lấp
+   * phần còn lại — 1247 câu phủ đủ 50 bài.
+   */
+  const exercises = useMemo<ExerciseItem[]>(() => {
+    const authored: ExerciseItem[] = lesson.mnn_exercises.map((e) => ({
+      id: e.id,
+      type: e.type as 'fill_blank' | 'multiple_choice',
+      question: e.question,
+      options: Array.isArray(e.options) ? (e.options as string[]) : null,
+      answer: e.answer,
+      explanation_vi: e.explanation_vi,
+    }))
+    const need = EXERCISE_LIMIT - authored.length
+    if (need <= 0) return authored.slice(0, EXERCISE_LIMIT)
+    return [...authored, ...generateExercises(lesson.mnn_sentences, need)]
+  }, [lesson.mnn_exercises, lesson.mnn_sentences])
+
+  const wordCount = lesson.mnn_vocabulary.filter(
+    (v) => v.reading && v.meaning_vi,
+  ).length
 
   function handleExerciseDone(r: ExerciseResult[]) {
     setResults(r)
@@ -62,16 +93,40 @@ export function LessonDetail({ lesson }: { lesson: MnnLessonFull }) {
       {/* Tab content */}
       {tab === 'content' && (
         <div className="space-y-8">
+          {wordCount > 0 && (
+            // Kiểm tra từ nằm ở trang RIÊNG chứ không phải tab ở đây: kiểm
+            // từng bài một thì không bao giờ ôn chéo được, mà đề thi không hỏi
+            // theo bài. Vào từ đây thì bài này được chọn sẵn, muốn thêm bài
+            // khác thì tick thêm.
+            <Link
+              href={`/lessons/practice?lessons=${lesson.lesson_number}`}
+              className="flex items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3 hover:bg-accent transition-colors"
+            >
+              <span className="flex items-center gap-2 text-sm font-medium">
+                <Dumbbell className="h-4 w-4" />
+                Kiểm tra {wordCount} từ của bài này
+              </span>
+              <span className="text-xs text-muted-foreground">
+                chọn thêm bài khác được →
+              </span>
+            </Link>
+          )}
           <VocabSection vocabulary={lesson.mnn_vocabulary} />
           <GrammarSection grammar={lesson.mnn_grammar} />
         </div>
       )}
 
       {tab === 'practice' && (
-        <ExerciseSession
-          exercises={lesson.mnn_exercises}
-          onComplete={handleExerciseDone}
-        />
+        exercises.length === 0 ? (
+          <p className="text-center py-12 text-sm text-muted-foreground">
+            Bài này chưa có câu ví dụ nào dựng được thành bài tập.
+          </p>
+        ) : (
+          <ExerciseSession
+            exercises={exercises}
+            onComplete={handleExerciseDone}
+          />
+        )
       )}
 
       {tab === 'result' && (

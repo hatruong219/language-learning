@@ -4,17 +4,23 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
-import type { MnnExercise } from '@/types/database'
+import type { GeneratedExercise } from '@/lib/grammar-quiz'
 import { CheckCircle, XCircle, ArrowRight, RotateCcw } from 'lucide-react'
 
+/**
+ * Bài tập, hình dạng CHUNG cho cả đề viết tay (`mnn_exercises`) lẫn đề sinh tự
+ * động từ câu ví dụ. Nhờ vậy màn làm bài không cần biết đề tới từ đâu.
+ */
+export type ExerciseItem = GeneratedExercise
+
 export interface ExerciseResult {
-  exercise: MnnExercise
+  exercise: ExerciseItem
   userAnswer: string
   correct: boolean
 }
 
 interface Props {
-  exercises: MnnExercise[]
+  exercises: ExerciseItem[]
   onComplete: (results: ExerciseResult[]) => void
 }
 
@@ -136,7 +142,7 @@ export function ExerciseSession({ exercises, onComplete }: Props) {
 
         {current.type === 'multiple_choice' && phase === 'running' && (
           <div className="grid grid-cols-1 gap-2">
-            {(current.options as string[]).map((opt) => (
+            {(current.options ?? []).map((opt) => (
               <button
                 key={opt}
                 onClick={() => checkAnswer(opt)}

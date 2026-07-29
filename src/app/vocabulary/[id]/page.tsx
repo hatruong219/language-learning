@@ -127,7 +127,7 @@ export default async function VocabularyDetailPage({
       <div className="flex justify-center">
         {word.deck && (
           <Button asChild>
-            <Link href={`/flashcard/${word.deck.slug}`}>
+            <Link href="/vocabulary/flashcard">
               <Zap className="mr-2 h-4 w-4" />
               Học flashcard deck này
             </Link>
