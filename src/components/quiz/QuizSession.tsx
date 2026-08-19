@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { buildQuiz, DEFAULT_LENGTH } from '@/lib/quiz'
+import { buildQuiz } from '@/lib/quiz'
 import type { AnswerState, Question, QuizKind, QuizWord } from '@/lib/quiz'
 import { QuizSetup } from './QuizSetup'
 import { QuizRunner } from './QuizRunner'
@@ -10,8 +10,14 @@ import { QuizSummary } from './QuizSummary'
 interface Props {
   /** Danh sách từ. Nguồn nào cũng được — component không cần biết. */
   words: QuizWord[]
-  /** Dạng câu hỏi bật sẵn. Bỏ trống thì bật cả bốn. */
-  defaultKinds?: QuizKind[]
+  /**
+   * HAI dạng đề hợp với phần này; dạng đầu là mặc định.
+   *
+   * Từ vựng dùng `['vi2ja', 'ja2vi']`, chữ Hán dùng `['reading', 'writing']`.
+   * Bày cả bốn ở mọi nơi thì màn chuẩn bị rối hơn cả việc học, mà hai dạng chữ
+   * Hán không hợp với từ vựng Minna — phần lớn viết bằng kana.
+   */
+  kinds: readonly QuizKind[]
 }
 
 type Phase = 'setup' | 'running' | 'summary'
@@ -23,19 +29,16 @@ type Phase = 'setup' | 'running' | 'summary'
  * hoạch đăng nhập và đồng bộ riêng, web nhảy vào lưu lúc này là đẻ ra một không
  * gian id thứ tư phải hoà giải về sau.
  */
-export function QuizSession({ words, defaultKinds }: Props) {
+export function QuizSession({ words, kinds }: Props) {
   const [phase, setPhase] = useState<Phase>('setup')
-  const [count, setCount] = useState(DEFAULT_LENGTH)
-  const [kinds, setKinds] = useState<QuizKind[]>(
-    defaultKinds ?? ['vi2ja', 'ja2vi', 'reading', 'writing'],
-  )
+  const [kind, setKind] = useState<QuizKind>(kinds[0])
   const [questions, setQuestions] = useState<Question[]>([])
   const [states, setStates] = useState<AnswerState[]>([])
   const [answers, setAnswers] = useState<string[]>([])
   const [index, setIndex] = useState(0)
 
   function start() {
-    const qs = buildQuiz(words, { count, kinds })
+    const qs = buildQuiz(words, kind)
     if (qs.length === 0) return
     setQuestions(qs)
     setStates(qs.map(() => 'pending'))
@@ -75,10 +78,9 @@ export function QuizSession({ words, defaultKinds }: Props) {
     return (
       <QuizSetup
         words={words}
-        count={count}
         kinds={kinds}
-        onCount={setCount}
-        onKinds={setKinds}
+        kind={kind}
+        onKind={setKind}
         onStart={start}
       />
     )

@@ -43,7 +43,6 @@ export type Question = {
 }
 
 export const OPTION_COUNT = 4
-export const DEFAULT_LENGTH = 10
 
 const KANJI = /[一-鿿]/u
 
@@ -186,61 +185,42 @@ function makeQuestion(
   }
 }
 
-export type BuildOptions = {
-  count?: number
-  kinds?: readonly QuizKind[]
-  seed?: number
-}
-
 /**
- * Dựng bộ đề. Mỗi từ chỉ hỏi MỘT lần trong phiên — gặp lại cùng một từ ở câu 3
- * và câu 8 làm phiên trông như hết đề.
+ * Dựng bộ đề cho MỘT dạng câu hỏi, ra đề HẾT phạm vi đã chọn.
  *
- * Dạng nào không dựng nổi cho từ đó thì bỏ qua từ đó, không báo lỗi: `writing`
- * cần từ có kanji, `ja2vi` cần đủ 3 nghĩa khác nhau trong kho.
+ * Không có tuỳ chọn "số câu": phạm vi CHÍNH LÀ cỡ phiên. Chọn 400 từ rồi lại
+ * bắt chọn tối đa 40 câu là thừa một bước mà vẫn không kiểm soát được gì —
+ * muốn ít thì chọn ít bài.
+ *
+ * Mỗi từ chỉ hỏi MỘT lần. Từ nào không dựng nổi dạng đó thì bỏ qua, không báo
+ * lỗi: `writing` cần từ có chữ Hán, `ja2vi` cần đủ 3 nghĩa khác trong kho.
  */
 export function buildQuiz(
   words: readonly QuizWord[],
-  opts: BuildOptions = {},
+  kind: QuizKind,
+  seed = Date.now(),
 ): Question[] {
-  const {
-    count = DEFAULT_LENGTH,
-    kinds = ['vi2ja', 'ja2vi', 'reading', 'writing'],
-    seed = Date.now(),
-  } = opts
-  if (words.length === 0 || kinds.length === 0) return []
-
+  if (words.length === 0) return []
   const rng = makeRng(seed)
   const out: Question[] = []
 
   for (const w of shuffle(words, rng)) {
-    if (out.length >= count) break
     // Hai dạng chữ Hán chỉ dựng được khi từ CÓ chữ Hán.
-    const usable = kinds.filter(
-      (k) => (k !== 'reading' && k !== 'writing') || hasKanji(w),
-    )
-    if (usable.length === 0) continue
-    const q = makeQuestion(
-      w,
-      usable[Math.floor(rng() * usable.length)],
-      words,
-      rng,
-    )
+    if ((kind === 'reading' || kind === 'writing') && !hasKanji(w)) continue
+    const q = makeQuestion(w, kind, words, rng)
     if (q) out.push(q)
   }
   return out
 }
 
-/** Đếm được bao nhiêu câu với lựa chọn hiện tại, không dựng thật. */
+/** Đếm số từ ra đề được với dạng này, không dựng thật. */
 export function countAvailable(
   words: readonly QuizWord[],
-  kinds: readonly QuizKind[],
+  kind: QuizKind,
 ): number {
-  if (kinds.length === 0) return 0
-  const needsKanji = kinds.every((k) => k === 'reading' || k === 'writing')
+  const needsKanji = kind === 'reading' || kind === 'writing'
   return words.filter(
-    (w) =>
-      w.reading.trim() && w.meaning.trim() && (!needsKanji || hasKanji(w)),
+    (w) => w.reading.trim() && w.meaning.trim() && (!needsKanji || hasKanji(w)),
   ).length
 }
 
