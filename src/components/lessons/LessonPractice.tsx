@@ -45,7 +45,7 @@ export function LessonPractice({ lessons, preset }: Props) {
         >
           ← Chọn bài khác
         </button>
-        <QuizSession words={words} />
+        <QuizSession words={words} kinds={['vi2ja', 'ja2vi']} />
       </div>
     )
   }

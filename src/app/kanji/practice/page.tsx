@@ -56,7 +56,7 @@ export default async function KanjiPracticePage() {
           Chưa có dữ liệu để luyện tập.
         </p>
       ) : (
-        <QuizSession words={words} />
+        <QuizSession words={words} kinds={['reading', 'writing']} />
       )}
     </div>
   )
