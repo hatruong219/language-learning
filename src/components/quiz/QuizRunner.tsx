@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { checkAnswer } from '@/lib/quiz'
+import { useEnterToContinue } from '@/hooks/use-enter-to-continue'
 import type { AnswerState, Question } from '@/lib/quiz'
 
 const KIND_HEADING: Record<Question['kind'], string> = {
@@ -50,6 +51,8 @@ export function QuizRunner({
       return () => clearTimeout(t)
     }
   }, [q])
+
+  useEnterToContinue(revealed, onNext)
 
   if (!q) return null
 

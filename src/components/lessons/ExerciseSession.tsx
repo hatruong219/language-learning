@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import type { GeneratedExercise } from '@/lib/grammar-quiz'
+import { useEnterToContinue } from '@/hooks/use-enter-to-continue'
 import { CheckCircle, XCircle, ArrowRight, RotateCcw } from 'lucide-react'
 
 /**
@@ -75,6 +76,11 @@ export function ExerciseSession({ exercises, onComplete }: Props) {
     setFeedback(null)
     setPhase('running')
   }
+
+  // Câu cuối tự chốt phiên sau 1.2s nên không có nút "Câu tiếp theo" —
+  // Enter ở đó cũng phải im, không thì chốt phiên hai lần.
+  const hasNext = index + 1 < exercises.length
+  useEnterToContinue(phase === 'feedback' && hasNext, next)
 
   if (phase === 'idle') {
     return (
