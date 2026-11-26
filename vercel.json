@@ -4,6 +4,15 @@
       "master": true,
       "*": false
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/kanji/push",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/kanji/push?slot=review",
+      "schedule": "0 10 * * *"
+    }
+  ]
 }
-

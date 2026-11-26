@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Dumbbell } from 'lucide-react'
+import { CalendarDays, Dumbbell } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { KanjiWordBrowser } from '@/components/kanji/KanjiWordBrowser'
 import type { KanjiWordRow } from '@/components/kanji/KanjiWordBrowser'
@@ -36,19 +36,27 @@ export default async function KanjiPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <div className="mb-6 flex items-start justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold mb-1">Từ vựng chữ Hán</h1>
           <p className="text-muted-foreground">
             {words.length} từ · theo thứ tự giáo trình
           </p>
         </div>
-        <Link
-          href="/kanji/practice"
-          className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium hover:bg-accent transition-colors shrink-0"
-        >
-          <Dumbbell className="h-4 w-4" /> Luyện tập
-        </Link>
+        <div className="flex gap-2 shrink-0">
+          <Link
+            href="/kanji/daily"
+            className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium hover:bg-accent transition-colors"
+          >
+            <CalendarDays className="h-4 w-4" /> Kanji hôm nay
+          </Link>
+          <Link
+            href="/kanji/practice"
+            className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium hover:bg-accent transition-colors"
+          >
+            <Dumbbell className="h-4 w-4" /> Luyện tập
+          </Link>
+        </div>
       </div>
 
       {words.length === 0 ? (
