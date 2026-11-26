@@ -1,0 +1,14 @@
+{
+  "id": "/kanji/daily/",
+  "name": "Kanji mỗi ngày",
+  "short_name": "Kanji",
+  "start_url": "/kanji/daily/today",
+  "scope": "/kanji/daily/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#10b981",
+  "icons": [
+    { "src": "/kanji-daily/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/kanji-daily/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
