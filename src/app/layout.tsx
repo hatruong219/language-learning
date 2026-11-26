@@ -2,8 +2,6 @@ import type { Metadata } from 'next'
 import { Noto_Sans_JP } from 'next/font/google'
 import NextTopLoader from 'nextjs-toploader'
 import './globals.css'
-import { Header } from '@/components/layout/Header'
-import { Footer } from '@/components/layout/Footer'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 
 const notoSansJP = Noto_Sans_JP({
@@ -40,9 +38,8 @@ export default function RootLayout({
             easing="ease"
             speed={200}
           />
-          <Header />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
+          {/* Header/Footer nằm ở (site)/layout.tsx — trang (daily) có khung riêng */}
+          {children}
         </ThemeProvider>
       </body>
     </html>
