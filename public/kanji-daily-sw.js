@@ -1,4 +1,4 @@
-// Service worker cho app "Kanji mỗi ngày" (đăng ký với scope /kanji/daily/).
+// Service worker cho app "Kanji mỗi ngày" (đăng ký với scope /kanji/daily).
 // Đặt ở gốc site vì service worker chỉ được scope trong thư mục chứa nó.
 
 self.addEventListener('install', () => self.skipWaiting())

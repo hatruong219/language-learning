@@ -1,9 +1,9 @@
 {
-  "id": "/kanji/daily/",
+  "id": "/kanji/daily",
   "name": "Kanji mỗi ngày",
   "short_name": "Kanji",
   "start_url": "/kanji/daily/today",
-  "scope": "/kanji/daily/",
+  "scope": "/kanji/daily",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#10b981",

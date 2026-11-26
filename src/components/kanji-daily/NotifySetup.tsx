@@ -4,7 +4,9 @@ import { useState, useSyncExternalStore } from 'react'
 import { Bell, Copy } from 'lucide-react'
 
 const SW_URL = '/kanji-daily-sw.js'
-const SW_SCOPE = '/kanji/daily/'
+// Không có dấu / cuối: scope so khớp theo tiền tố, '/kanji/daily/' sẽ không
+// bao trang danh sách '/kanji/daily' → service worker không bao giờ "ready".
+const SW_SCOPE = '/kanji/daily'
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ''
 
 type Env = 'unsupported' | 'browser' | 'app'
@@ -31,6 +33,26 @@ function keyBytes(base64url: string): Uint8Array<ArrayBuffer> {
   return out
 }
 
+/** Chờ chính registration này có worker đang chạy (không dùng serviceWorker.ready,
+ *  vì nó chỉ resolve khi trang hiện tại nằm trong scope). */
+function waitActive(reg: ServiceWorkerRegistration): Promise<ServiceWorkerRegistration> {
+  if (reg.active) return Promise.resolve(reg)
+  const sw = reg.installing ?? reg.waiting
+  if (!sw || sw.state === 'activated') return Promise.resolve(reg)
+  return new Promise((resolve) => {
+    sw.addEventListener('statechange', () => {
+      if (sw.state === 'activated') resolve(reg)
+    })
+  })
+}
+
+function withTimeout<T>(p: Promise<T>, ms: number, message: string): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error(message)), ms)),
+  ])
+}
+
 /**
  * Bật thông báo Web Push cho app. Chỉ một người dùng nên không lưu đăng ký vào
  * database: hiện mã đăng ký để dán vào biến môi trường PUSH_SUBSCRIPTION.
@@ -52,14 +74,21 @@ export function NotifySetup() {
         setStatus('Chưa được cho phép thông báo. Vào Cài đặt → Thông báo → Kanji để bật.')
         return
       }
-      const reg = await navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE })
-      await navigator.serviceWorker.ready
+      const reg = await withTimeout(
+        navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE }).then(waitActive),
+        20_000,
+        'Service worker không khởi động được',
+      )
       const sub =
         (await reg.pushManager.getSubscription()) ??
-        (await reg.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: keyBytes(VAPID_PUBLIC_KEY),
-        }))
+        (await withTimeout(
+          reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: keyBytes(VAPID_PUBLIC_KEY),
+          }),
+          20_000,
+          'Đăng ký nhận thông báo quá lâu',
+        ))
       setCode(JSON.stringify(sub))
     } catch (e) {
       setStatus(`Lỗi: ${e instanceof Error ? e.message : String(e)}`)
