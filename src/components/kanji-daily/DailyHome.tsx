@@ -5,6 +5,7 @@ import { ChevronRight } from 'lucide-react'
 import { KANJI, START_DATE, formatDate, introDate, kanjiOfDay } from '@/lib/daily-kanji'
 import { dueItems, learnedItems } from '@/lib/kanji-srs'
 import { useSrsStates } from '@/lib/kanji-srs-store'
+import { QuickLookup } from './QuickLookup'
 
 /** Màn lịch sử: ôn tập hôm nay + chữ hôm nay + các chữ đã học theo ngày. */
 export function DailyHome({ today }: { today: string }) {
@@ -15,9 +16,12 @@ export function DailyHome({ today }: { today: string }) {
 
   if (items.length === 0) {
     return (
-      <p className="py-16 text-center text-muted-foreground">
-        Chữ đầu tiên sẽ mở vào ngày {formatDate(START_DATE)}.
-      </p>
+      <div className="space-y-6">
+        <p className="py-10 text-center text-muted-foreground">
+          Chữ đầu tiên sẽ mở vào ngày {formatDate(START_DATE)}.
+        </p>
+        <QuickLookup today={today} />
+      </div>
     )
   }
 
@@ -67,6 +71,8 @@ export function DailyHome({ today }: { today: string }) {
           Đã mở hết {KANJI.length} chữ. Từ giờ chỉ còn ôn theo lịch nhắc lại.
         </p>
       )}
+
+      <QuickLookup today={today} />
 
       <section className="space-y-2">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">

@@ -3,9 +3,11 @@ import type { Metadata } from 'next'
 
 // Trang riêng cho push kanji mỗi ngày: không có menu của web học, không được
 // link từ đâu trong site — chỉ ai có link mới vào. Logo để quay về web học.
+// Cố ý KHÔNG khai báo appleWebApp.capable: icon "Thêm vào Màn hình chính" sẽ
+// mở trong Safari, dùng chung localStorage (tiến độ ôn) với link bấm từ push.
+// Bật chế độ web app thì iOS tách dữ liệu riêng → tiến độ bị chia làm hai.
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
-  appleWebApp: { capable: true, title: 'Kanji mỗi ngày' },
 }
 
 export default function DailyLayout({ children }: { children: React.ReactNode }) {

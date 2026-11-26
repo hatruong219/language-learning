@@ -52,7 +52,8 @@ export async function GET(req: Request) {
   return Response.json({ ok: res.ok, date: today, title: push.title }, { status: res.ok ? 200 : 502 })
 }
 
-function newKanjiPush(k: DailyKanji, index: number, today: string, siteUrl: string): Push {
+/** Nội dung đầy đủ của một chữ — dùng chung cho push sáng và push ôn */
+function kanjiLines(k: DailyKanji): string[] {
   const lines = [
     `${k.hv} · ${k.mean}`,
     `On: ${k.on}${k.kun ? ` · Kun: ${k.kun}` : ''}`,
@@ -61,9 +62,13 @@ function newKanjiPush(k: DailyKanji, index: number, today: string, siteUrl: stri
   if (k.similar?.length) {
     lines.push(`Dễ nhầm với: ${k.similar.map(([c, m]) => `${c} (${m})`).join(', ')}`)
   }
+  return lines
+}
+
+function newKanjiPush(k: DailyKanji, index: number, today: string, siteUrl: string): Push {
   return {
     title: `📅 Kanji ngày ${index + 1}/${KANJI.length}: ${k.k}`,
-    message: lines.join('\n'),
+    message: kanjiLines(k).join('\n'),
     click: `${siteUrl}/kanji/daily/${today}`,
   }
 }
@@ -71,15 +76,11 @@ function newKanjiPush(k: DailyKanji, index: number, today: string, siteUrl: stri
 function reviewPush(today: string, siteUrl: string): Push | null {
   const due = scheduledReviews(today)
   if (due.length === 0) return null
-  // Chỉ hiện mặt chữ — hiện cả nghĩa thì nhìn thông báo là thấy đáp án, mất
-  // bước tự nhớ lại.
-  const lines = [
-    due.map((k) => k.k).join('　'),
-    'Tự nhớ nghĩa + cách đọc trước, rồi mở để kiểm tra và bấm Nhớ / Quên',
-  ]
+  // Mỗi chữ hiện đầy đủ như push buổi sáng, cách nhau một dòng trống.
+  const blocks = due.map((k) => [`【${k.k}】`, ...kanjiLines(k)].join('\n'))
   return {
-    title: `🔁 Ôn tập: ${due.length} chữ`,
-    message: lines.join('\n'),
+    title: `🔁 Ôn tập: ${due.map((k) => k.k).join(' ')}`,
+    message: blocks.join('\n\n'),
     click: `${siteUrl}/kanji/daily/review`,
   }
 }
