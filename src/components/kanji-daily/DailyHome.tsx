@@ -6,6 +6,7 @@ import { KANJI, START_DATE, formatDate, introDate, kanjiOfDay } from '@/lib/dail
 import { dueItems, learnedItems } from '@/lib/kanji-srs'
 import { useSrsStates } from '@/lib/kanji-srs-store'
 import { QuickLookup } from './QuickLookup'
+import { NotifySetup } from './NotifySetup'
 
 /** Màn lịch sử: ôn tập hôm nay + chữ hôm nay + các chữ đã học theo ngày. */
 export function DailyHome({ today }: { today: string }) {
@@ -21,6 +22,7 @@ export function DailyHome({ today }: { today: string }) {
           Chữ đầu tiên sẽ mở vào ngày {formatDate(START_DATE)}.
         </p>
         <QuickLookup today={today} />
+        <NotifySetup />
       </div>
     )
   }
@@ -109,6 +111,8 @@ export function DailyHome({ today }: { today: string }) {
           })}
         </ul>
       </section>
+
+      <NotifySetup />
     </div>
   )
 }
