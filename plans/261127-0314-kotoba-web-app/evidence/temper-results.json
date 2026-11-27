@@ -1,0 +1,53 @@
+{
+  "commands": [
+    {
+      "command": "flutter analyze --fatal-infos",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "No issues found! (ran in 0.9s)",
+      "ts": "2026-11-27T04:47:30Z"
+    },
+    {
+      "command": "flutter test",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "00:41 +528: All tests passed!                                                                                                                                                                          ",
+      "ts": "2026-11-27T04:48:13Z"
+    },
+    {
+      "command": "flutter build web --release --base-href /kotoba-app/app/ --no-web-resources-cdn",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "✓ Built build/web",
+      "ts": "2026-11-27T04:48:15Z"
+    },
+    {
+      "command": "python3 tools/check-font-coverage.py",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "OK",
+      "ts": "2026-11-27T04:48:19Z"
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "npx tsc --noEmit → exit 0",
+      "ts": "2026-11-27T04:48:20Z"
+    },
+    {
+      "command": "npx eslint (changed files)",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "npx eslint (changed files) → exit 0",
+      "ts": "2026-11-27T04:48:22Z"
+    },
+    {
+      "command": "pnpm build (next production)",
+      "exitCode": 0,
+      "status": "pass",
+      "summary": "ƒ  (Dynamic)  server-rendered on demand",
+      "ts": "2026-11-27T04:48:34Z"
+    }
+  ]
+}

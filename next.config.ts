@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
       { source: '/flashcard/:slug', destination: '/vocabulary/flashcard', permanent: true },
       { source: '/decks', destination: '/vocabulary', permanent: true },
       { source: '/decks/:slug', destination: '/vocabulary', permanent: true },
+      // App Flutter web là file tĩnh; Next bỏ dấu `/` cuối nên dùng index.html làm URL chuẩn.
+      { source: '/kotoba-app/app', destination: '/kotoba-app/app/index.html', permanent: false },
+      { source: '/kotoba-app/app/', destination: '/kotoba-app/app/index.html', permanent: false },
     ]
   },
 };

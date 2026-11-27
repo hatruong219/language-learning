@@ -1,0 +1,29 @@
+{
+  "score": 9,
+  "criticalCount": 0,
+  "decision": "SEALED",
+  "acceptanceCovered": [
+    "All Flutter tests pass and flutter analyze --fatal-infos is clean in kotoba/ (temper: analyze exit 0, flutter test +528 exit 0)",
+    "No dart:io or path_provider in kotoba/lib; progress/settings/data persist in IndexedDB across reload (grep clean; IdbKvStore atomic putAll with abort on error; unsafe-read guard stops overwrite; flushOnLeave on inactive/pause/hide/detach)",
+    "Sync calls same-origin /kotoba-app/api/kotoba/{grammar,kanji,kanji-words} proxied to admin.truongha.com without forwarding cookies (route.ts allowlist includes kanji-words, server-side fetch with no user headers)",
+    "Mic records WAV in browser and POSTs to /kotoba-app/api/stt; expected answer is never sent; silence is not uploaded (groqTranscribe sends no prompt; silence detector in speech_service; no-await-before-start for iOS permission; blob URL revoked)",
+    "STT route rejects cross-site, non-WAV, oversized, and over-rate requests (isSameOrigin via Sec-Fetch-Site/Origin==Host, content-type + RIFF/WAVE check, 800KB cap, 30 req/min/IP in-memory)",
+    "App renders with bundled fonts and makes no request to fonts.gstatic.com or www.gstatic.com (Roboto alias in pubspec, explicit fontFamily, check-font-coverage.py exit 0, font_*_test; grep shows gstatic only in comments)",
+    "PWA manifest scope /kotoba-app/app/, start_url /kotoba-app/app/index.html, apple-touch-icon present (manifest.json, web/index.html line 21)",
+    "Guide page /kotoba-app and Header Kotoba link exist; normal pages still refresh Supabase session (Header NAV_LINKS; proxy matcher only excludes kotoba-app/app/ and kotoba-app/api/, guide page and all other routes still pass through proxy)",
+    "scripts/build-kotoba-web.sh builds on Amazon Linux 2023 and Next production build succeeds; tsc clean (script installs unzip via dnf, FLUTTER_ALLOW_ROOT, pinned 3.32.0; temper: flutter web compile, tsc, eslint, next build all exit 0)"
+  ],
+  "regressionChecked": [
+    "Vercel production deploy of study.truongha.com: buildCommand 'pnpm build:kotoba && pnpm build'; pnpm build alone still works without Flutter",
+    "Supabase session refresh for all site pages (proxy matcher): only static app files and api routes under kotoba-app excluded; /kotoba-app guide and /kotoba-app/app (redirect) still refreshed",
+    "Header navigation: one added link, no change to existing entries",
+    "Groq API quota shared with writing-test grading: STT route guarded by same-origin, WAV sniff, size cap, per-IP rate limit; residual per-instance limit accepted, Groq spend cap is final backstop",
+    "User study progress stored in browser: transient IDB read error no longer renames/overwrites data; import validated with before-import backup; non-persistent storage banner; iOS home-screen storage separation noted in guide",
+    "next.config redirects /kotoba-app/app and /kotoba-app/app/ to index.html (non-permanent, no loop with static file)",
+    "Fix-introduced regressions: matcher regex valid, redirects not permanent, abort path in kv_store swallows secondary error then rethrows original"
+  ],
+  "contractStatus": "OK",
+  "refuted": [],
+  "unproven": [],
+  "reachableRegressions": []
+}

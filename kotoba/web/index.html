@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <!--
+    $FLUTTER_BASE_HREF được `flutter build web --base-href` thay bằng đường dẫn
+    phục vụ app (/kotoba-app/app/). Phải bắt đầu và kết thúc bằng dấu "/".
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Kotoba: học từ vựng, chữ Hán và ngữ pháp Minna no Nihongo bằng cách lật thẻ, gõ hoặc đọc to.">
+  <meta name="theme-color" content="#2D5BA9">
+
+  <!-- iOS / Android: chạy như app khi thêm vào màn hình chính -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Kotoba">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="manifest" href="manifest.json">
+
+  <title>Kotoba</title>
+
+  <style>
+    /* Màn chờ: lần đầu tải vài MB, đừng để trắng xoá. Flutter vẽ đè lên khi xong. */
+    html, body { margin: 0; height: 100%; background: #F4F6FA; }
+    @media (prefers-color-scheme: dark) { html, body { background: #0F1116; } }
+    #kotoba-loading {
+      position: fixed; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+      font: 600 22px system-ui, -apple-system, sans-serif; color: #2D5BA9;
+    }
+    #kotoba-loading i {
+      width: 30px; height: 30px; border-radius: 50%;
+      border: 3px solid #DCE1EB; border-top-color: #2D5BA9;
+      animation: kotoba-spin 0.9s linear infinite;
+    }
+    @media (prefers-color-scheme: dark) {
+      #kotoba-loading { color: #7AA5EC; }
+      #kotoba-loading i { border-color: #2E3542; border-top-color: #7AA5EC; }
+    }
+    @keyframes kotoba-spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="kotoba-loading"><span>Kotoba</span><i></i></div>
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      var el = document.getElementById('kotoba-loading');
+      if (el) el.remove();
+    });
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
