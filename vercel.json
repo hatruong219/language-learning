@@ -1,4 +1,5 @@
 {
+  "buildCommand": "pnpm build:kotoba && pnpm build",
   "git": {
     "deploymentEnabled": {
       "master": true,

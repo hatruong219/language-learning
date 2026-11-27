@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:kotoba": "bash scripts/build-kotoba-web.sh",
     "start": "next start",
     "lint": "eslint"
   },

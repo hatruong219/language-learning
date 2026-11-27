@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Kotoba: mã Dart và bản dựng Flutter web, không phải TS của site.
+    "kotoba/**",
+    "public/kotoba-app/**",
   ]),
 ]);
 

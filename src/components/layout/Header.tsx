@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { BookOpen, Grid3x3, Menu, PenLine, BookMarked, Languages } from 'lucide-react'
+import { BookOpen, Grid3x3, Menu, PenLine, BookMarked, Languages, Smartphone } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: '/kanji', label: 'Kanji', icon: Languages },
   { href: '/writing-test', label: 'Luyện viết', icon: PenLine },
   { href: '/alphabet', label: 'Bảng chữ', icon: Grid3x3 },
+  { href: '/kotoba-app', label: 'Kotoba', icon: Smartphone },
 ] as const
 
 export function Header() {

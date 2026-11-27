@@ -1,0 +1,43 @@
+{
+  "task": "Port Flutter app Kotoba into language-learning as a PWA at /kotoba-app/app with Groq Whisper mic, same-origin sync proxy, guide page and Vercel build",
+  "mode": "interactive",
+  "acceptanceCriteria": [
+    "All Flutter tests pass and flutter analyze --fatal-infos is clean in kotoba/",
+    "No dart:io or path_provider in kotoba/lib; progress/settings/data persist in IndexedDB across reload",
+    "Sync calls same-origin /kotoba-app/api/kotoba/{grammar,kanji,kanji-words} proxied to admin.truongha.com without forwarding cookies",
+    "Mic records WAV in browser and POSTs to /kotoba-app/api/stt; expected answer is never sent; silence is not uploaded",
+    "STT route rejects cross-site, non-WAV, oversized, and over-rate requests",
+    "App renders with bundled fonts and makes no request to fonts.gstatic.com or www.gstatic.com",
+    "PWA manifest scope /kotoba-app/app/, start_url /kotoba-app/app/index.html, apple-touch-icon present",
+    "Guide page /kotoba-app and Header Kotoba link exist; normal pages still refresh Supabase session",
+    "scripts/build-kotoba-web.sh builds on Amazon Linux 2023 and Next production build succeeds; tsc clean"
+  ],
+  "touchpoints": [
+    "kotoba/**",
+    "src/app/kotoba-app/**",
+    "src/lib/groqTranscribe.ts",
+    "src/lib/sttGuards.ts",
+    "src/components/kotoba/KotobaInstallGuide.tsx",
+    "src/components/layout/Header.tsx",
+    "src/proxy.ts",
+    "next.config.ts",
+    "vercel.json",
+    "package.json",
+    "scripts/build-kotoba-web.sh",
+    ".gitignore",
+    "eslint.config.mjs"
+  ],
+  "blastRadius": [
+    "Vercel production deploy of study.truongha.com (buildCommand now runs Flutter build)",
+    "Supabase session refresh for all site pages (proxy matcher)",
+    "Header navigation",
+    "Groq API quota shared with writing-test grading",
+    "User study progress stored in browser"
+  ],
+  "contracts": [
+    "POST /kotoba-app/api/stt raw audio/wav -> {text}|{error}",
+    "GET /kotoba-app/api/kotoba/{grammar|kanji|kanji-words} -> upstream JSON",
+    "Backup JSON {app:'mnn_flashcard', version:1, words} compatible with iOS app",
+    "pnpm build works without Flutter; pnpm build:kotoba builds the PWA"
+  ]
+}

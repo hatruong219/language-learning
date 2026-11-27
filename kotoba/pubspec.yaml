@@ -1,0 +1,65 @@
+name: mnn_flashcard
+description: Học từ vựng Minna no Nihongo — lật thẻ, gõ hoặc đọc.
+publish_to: 'none'
+version: 1.2.0+3
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Mic: ghi WAV 16 kHz ngay trong trình duyệt, rồi gửi lên /kotoba-app/api/stt.
+  record: ^6.2.1
+
+  # Đọc từ lên bằng giọng Nhật (speechSynthesis của trình duyệt).
+  flutter_tts: ^4.2.0
+
+  # Nhập lại file sao lưu tiến độ (xuất ra thì tải file qua package:web).
+  file_picker: ^8.1.7
+
+  # Gọi API của trang quản trị khi người dùng bấm đồng bộ. Chỉ lúc đó — mở app
+  # thì đọc bản đóng gói trong assets/, không phụ thuộc mạng.
+  http: ^1.2.2
+
+  # Nơi cất tiến độ, cài đặt và bản đồng bộ: IndexedDB trên trình duyệt. Bản
+  # bộ nhớ của idb_shim cho test chạy cùng một đường mã trên VM.
+  idb_shim: ^2.6.7
+
+  # Tải file sao lưu xuống và xin trình duyệt giữ lại dữ liệu (chỉ trên web).
+  web: ^1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/vocabulary.json
+    - assets/kanji.json
+    - assets/grammar.json
+    - assets/kanji-words.json
+
+  # Font đóng gói sẵn (subset, tools/subset-fonts.py): CanvasKit không dùng font
+  # hệ thống và sẽ tải từ fonts.gstatic.com nếu thiếu glyph.
+  fonts:
+    - family: NotoSans
+      fonts:
+        - asset: assets/fonts/NotoSans-Regular.ttf
+        - asset: assets/fonts/NotoSans-Bold.ttf
+          weight: 700
+    # Engine CanvasKit luôn tải Roboto từ fonts.gstatic.com nếu manifest không
+    # có family tên 'Roboto' (canvaskit/fonts.dart). Khai báo trùng file NotoSans
+    # để nó có sẵn, khỏi gọi mạng — cùng URL asset nên không tải thêm byte nào.
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/NotoSans-Regular.ttf
+    - family: NotoSansJP
+      fonts:
+        - asset: assets/fonts/NotoSansJP-Regular.ttf
+        - asset: assets/fonts/NotoSansJP-Bold.ttf
+          weight: 700

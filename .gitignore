@@ -41,3 +41,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Kotoba (Flutter web): mã nguồn ở kotoba/, bản dựng chép vào public/kotoba-app/app lúc deploy
+/public/kotoba-app/app/
+/kotoba/.dart_tool/
+/kotoba/.flutter-plugins*
+/.flutter-sdk/
+/kotoba/build/
