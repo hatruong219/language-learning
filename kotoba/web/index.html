@@ -47,6 +47,9 @@
   </style>
 </head>
 <body>
+  <!-- Thẻ dò vùng an toàn: Flutter web không tự đọc env(safe-area-inset-*),
+       app đọc padding của thẻ này (lib/browser_safe_area_reader_web.dart). -->
+  <div id="kotoba-safe-area" aria-hidden="true" style="position:fixed;top:0;left:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)"></div>
   <div id="kotoba-loading"><span>Kotoba</span><i></i></div>
   <script>
     window.addEventListener('flutter-first-frame', function () {

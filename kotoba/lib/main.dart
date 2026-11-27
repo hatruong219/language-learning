@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 
 import 'app_scope.dart';
+import 'browser_safe_area.dart';
 import 'data/grammar.dart';
 import 'flush_on_leave.dart';
 import 'data/kanji.dart';
@@ -154,6 +155,7 @@ class _MnnFlashcardAppState extends State<MnnFlashcardApp> {
     debugShowCheckedModeBanner: false,
     theme: buildTheme(Brightness.light),
     darkTheme: buildTheme(Brightness.dark),
+    builder: (context, child) => BrowserSafeArea(child: child!),
     home: home,
   );
 }
