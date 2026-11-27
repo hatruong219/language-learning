@@ -149,11 +149,17 @@ class _Toolbar extends StatelessWidget {
                         onChanged('');
                       },
                     ),
+              // Cùng kiểu ô tìm ở Trang chủ: nền trũng, không viền, viền chàm
+              // khi đang gõ. Hai ô tìm hai kiểu thì nhìn như hai app ghép lại.
               filled: true,
-              fillColor: c.card,
+              fillColor: c.sunken,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(11),
-                borderSide: BorderSide(color: c.line),
+                borderRadius: BorderRadius.circular(Radii.control),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Radii.control),
+                borderSide: BorderSide(color: c.ai.withValues(alpha: 0.6)),
               ),
             ),
           ),

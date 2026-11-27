@@ -81,11 +81,7 @@ class _MissedRow extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: c.card,
-        borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: c.line),
-      ),
+      decoration: c.cardBox(radius: Radii.row),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

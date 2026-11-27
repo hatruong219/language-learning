@@ -69,7 +69,9 @@ class _LessonPickerState extends State<_LessonPicker> {
       ),
       decoration: BoxDecoration(
         color: c.card,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(Radii.sheet),
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -228,9 +230,7 @@ class _LessonPickerState extends State<_LessonPicker> {
       shape: BoxShape.circle,
       border: Border.all(color: on ? c.ai : c.line, width: 1.5),
     ),
-    child: on
-        ? const Icon(Icons.check_rounded, size: 13, color: Colors.white)
-        : null,
+    child: on ? Icon(Icons.check_rounded, size: 13, color: c.onAi) : null,
   );
 
   Widget _footer(Palette c, int total) {

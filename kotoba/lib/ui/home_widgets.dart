@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app_scope.dart';
 import '../data/vocabulary.dart';
 import '../theme.dart';
+import 'motion.dart';
 import 'home_screen.dart' show HomeFilter;
 import 'star_feedback.dart';
 import 'word_row.dart';
@@ -84,10 +85,15 @@ class SearchField extends StatelessWidget {
         filled: true,
         fillColor: c.sunken,
         isDense: true,
-        contentPadding: const EdgeInsets.symmetric(vertical: 11),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(Radii.control),
           borderSide: BorderSide.none,
+        ),
+        // Viền chàm khi đang gõ: biết ngay ô nào đang nhận phím.
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(Radii.control),
+          borderSide: BorderSide(color: c.ai.withValues(alpha: 0.6)),
         ),
       ),
     );
@@ -126,7 +132,7 @@ class FilterBar extends StatelessWidget {
             children: [
               Expanded(
                 child: _chip(
-                  c,
+                  context,
                   'Cần học lại',
                   filter == HomeFilter.starred,
                   () => onSelect(HomeFilter.starred),
@@ -135,7 +141,7 @@ class FilterBar extends StatelessWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: _chip(
-                  c,
+                  context,
                   lessonLabel,
                   filter == HomeFilter.byLesson,
                   () => onSelect(HomeFilter.byLesson),
@@ -144,7 +150,7 @@ class FilterBar extends StatelessWidget {
               const SizedBox(width: 6),
               Expanded(
                 child: _chip(
-                  c,
+                  context,
                   'Tất cả',
                   filter == HomeFilter.all,
                   () => onSelect(HomeFilter.all),
@@ -159,15 +165,27 @@ class FilterBar extends StatelessWidget {
     );
   }
 
-  Widget _chip(Palette c, String label, bool on, VoidCallback onTap) =>
-      GestureDetector(
+  Widget _chip(
+    BuildContext context,
+    String label,
+    bool on,
+    VoidCallback onTap,
+  ) {
+    final c = context.c;
+    // Kiểu "segmented": chip đang chọn nổi lên (nền card + bóng), chip còn lại
+    // chìm trong nền trũng. Đổi chọn thì màu/bóng chuyển mượt, không chớp.
+    return Pressable(
+      child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 7),
+        child: AnimatedContainer(
+          duration: Motion.of(context, Motion.quick),
+          curve: Motion.ease,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           decoration: BoxDecoration(
             color: on ? c.card : c.sunken,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: on ? c.line : Colors.transparent),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: on ? c.edge : c.sunken),
+            boxShadow: on ? c.raise : const [],
           ),
           child: Text(
             label,
@@ -177,9 +195,11 @@ class FilterBar extends StatelessWidget {
             style: TextStyle(
               fontSize: 12.5,
               fontWeight: on ? FontWeight.w600 : FontWeight.w500,
-              color: on ? c.ink : c.inkSoft,
+              color: on ? c.ai : c.inkSoft,
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }

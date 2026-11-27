@@ -75,11 +75,7 @@ class GrammarPatternCard extends StatelessWidget {
     final c = context.c;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: c.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: c.line),
-      ),
+      decoration: c.cardBox(radius: Radii.card),
       clipBehavior: Clip.antiAlias,
       child: Theme(
         // Bỏ vạch kẻ mặc định của ExpansionTile — thẻ đã có viền riêng rồi.

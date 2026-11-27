@@ -97,11 +97,7 @@ class GrammarPrompt extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
-      decoration: BoxDecoration(
-        color: c.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: c.line),
-      ),
+      decoration: c.cardBox(radius: Radii.card),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

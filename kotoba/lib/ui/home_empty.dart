@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import 'glyph_badge.dart';
+import 'motion.dart';
 import 'home_screen.dart' show HomeFilter;
 
 /// Trạng thái trống của Trang chủ.
@@ -77,47 +79,44 @@ class _Frame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(30, 60, 30, 30),
-      child: Column(
-        children: [
-          // Một chữ kanji thay cho hình minh hoạ — hợp với app học tiếng Nhật
-          // hơn là cái icon hộp rỗng chung chung.
-          Text(glyph, style: TextStyle(fontSize: 52, height: 1, color: c.line)),
-          const SizedBox(height: 20),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: c.ink,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            body,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14.5, height: 1.5, color: c.inkFaint),
-          ),
-          const SizedBox(height: 22),
-          if (primary != null)
-            FilledButton(onPressed: primary!.$2, child: Text(primary!.$1)),
-          if (secondary != null) ...[
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: secondary!.$2,
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(46),
-                side: BorderSide(color: c.line),
-                foregroundColor: c.inkSoft,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+      padding: const EdgeInsets.fromLTRB(30, 56, 30, 30),
+      // Khoá theo chữ minh hoạ: đổi bộ lọc sang trạng thái trống khác thì
+      // khối hiện ra lại, không đứng im đổi chữ.
+      child: EnterFadeSlide(
+        key: ValueKey(glyph),
+        child: Column(
+          children: [
+            // Một chữ kanji thay cho hình minh hoạ — hợp với app học tiếng Nhật
+            // hơn là cái icon hộp rỗng chung chung.
+            GlyphBadge(glyph),
+            const SizedBox(height: 22),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: c.ink,
               ),
-              child: Text(secondary!.$1),
             ),
+            const SizedBox(height: 8),
+            Text(
+              body,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14.5, height: 1.5, color: c.inkFaint),
+            ),
+            const SizedBox(height: 22),
+            if (primary != null)
+              FilledButton(onPressed: primary!.$2, child: Text(primary!.$1)),
+            if (secondary != null) ...[
+              const SizedBox(height: 8),
+              OutlinedButton(
+                onPressed: secondary!.$2,
+                child: Text(secondary!.$1),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

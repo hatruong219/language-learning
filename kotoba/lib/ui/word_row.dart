@@ -92,11 +92,7 @@ class _WordRowState extends State<WordRow> {
             // Viền phải đồng màu: Flutter cấm bo góc khi các cạnh khác màu
             // nhau. Vạch hổ phách vẽ thành dải riêng bên trong, không phải
             // bằng cách đổi màu cạnh trái.
-            decoration: BoxDecoration(
-              color: c.card,
-              borderRadius: BorderRadius.circular(11),
-              border: Border.all(color: c.line),
-            ),
+            decoration: c.cardBox(radius: Radii.row),
             clipBehavior: Clip.antiAlias,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -30,11 +30,7 @@ class SettingsGroup extends StatelessWidget {
             ),
           ),
           DecoratedBox(
-            decoration: BoxDecoration(
-              color: c.card,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: c.line),
-            ),
+            decoration: c.cardBox(radius: Radii.card),
             child: Column(
               children: [
                 for (var i = 0; i < children.length; i++) ...[

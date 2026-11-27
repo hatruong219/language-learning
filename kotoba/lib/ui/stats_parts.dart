@@ -17,11 +17,7 @@ class StatsSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 15, 16, 15),
       margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: c.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: c.line),
-      ),
+      decoration: c.cardBox(radius: Radii.card),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -195,7 +191,7 @@ class _Pill extends StatelessWidget {
           style: TextStyle(
             fontSize: 12.5,
             fontWeight: FontWeight.w600,
-            color: on ? Colors.white : c.inkSoft,
+            color: on ? c.onAi : c.inkSoft,
           ),
         ),
       ),
@@ -219,11 +215,7 @@ class StatRow extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.fromLTRB(13, 11, 6, 11),
-      decoration: BoxDecoration(
-        color: c.card,
-        borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: c.line),
-      ),
+      decoration: c.cardBox(radius: Radii.row),
       child: Row(
         children: [
           Expanded(

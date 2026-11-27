@@ -5,6 +5,7 @@ import '../theme.dart';
 import 'grammar_tabs.dart';
 import 'home_screen.dart';
 import 'kanji_tabs.dart';
+import 'motion.dart';
 import 'quiz_screen.dart';
 import 'settings_screen.dart';
 import 'storage_banner.dart';
@@ -56,8 +57,18 @@ class _RootTabsState extends State<RootTabs> {
         child: IndexedStack(index: _index, children: _pages),
       ),
       bottomNavigationBar: DecoratedBox(
+        // Vạch mảnh + bóng loang ngược lên: thanh tab "nổi" trên nội dung
+        // thay vì bị kẻ cứng một đường.
         decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: c.line)),
+          color: c.card,
+          border: Border(top: BorderSide(color: c.edge)),
+          boxShadow: [
+            BoxShadow(
+              color: c.raise.last.color,
+              blurRadius: 18,
+              offset: const Offset(0, -4),
+            ),
+          ],
         ),
         // Kẹp cỡ chữ NHÃN TAB ở ×1.3, không để nó theo hệ thống.
         //
@@ -72,34 +83,62 @@ class _RootTabsState extends State<RootTabs> {
             onTap: _select,
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home_rounded),
+                icon: _TabIcon(Icons.home_outlined),
+                activeIcon: _TabIcon(Icons.home_rounded, active: true),
                 label: 'Trang chủ',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.school_outlined),
-                activeIcon: Icon(Icons.school_rounded),
+                icon: _TabIcon(Icons.school_outlined),
+                activeIcon: _TabIcon(Icons.school_rounded, active: true),
                 label: 'Luyện tập',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.brush_outlined),
-                activeIcon: Icon(Icons.brush_rounded),
+                icon: _TabIcon(Icons.brush_outlined),
+                activeIcon: _TabIcon(Icons.brush_rounded, active: true),
                 label: 'Kanji',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.menu_book_outlined),
-                activeIcon: Icon(Icons.menu_book_rounded),
+                icon: _TabIcon(Icons.menu_book_outlined),
+                activeIcon: _TabIcon(Icons.menu_book_rounded, active: true),
                 label: 'Ngữ pháp',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.settings_outlined),
-                activeIcon: Icon(Icons.settings_rounded),
+                icon: _TabIcon(Icons.settings_outlined),
+                activeIcon: _TabIcon(Icons.settings_rounded, active: true),
                 label: 'Cài đặt',
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Icon tab. Tab đang chọn có viên nền chàm nhạt phía sau — dấu chọn rõ hơn
+/// chỉ đổi màu icon, nhất là với người nhìn màu kém.
+///
+/// Cả hai trạng thái cùng kích thước viên để đổi tab không làm nhãn nhảy.
+class _TabIcon extends StatelessWidget {
+  const _TabIcon(this.icon, {this.active = false});
+
+  final IconData icon;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return AnimatedContainer(
+      duration: Motion.of(context, Motion.quick),
+      curve: Motion.ease,
+      width: 52,
+      height: 30,
+      margin: const EdgeInsets.only(bottom: 2),
+      decoration: BoxDecoration(
+        color: active ? c.aiWash : c.aiWash.withValues(alpha: 0),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Icon(icon, size: 22),
     );
   }
 }
