@@ -142,11 +142,7 @@ class _Prompt extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      decoration: BoxDecoration(
-        color: c.card,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: c.line),
-      ),
+      decoration: c.cardBox(radius: Radii.card),
       child: Column(
         children: [
           Text(

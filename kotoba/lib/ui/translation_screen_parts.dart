@@ -97,11 +97,7 @@ class TranslationRunner extends StatelessWidget {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(15),
-                decoration: BoxDecoration(
-                  color: c.card,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: c.line),
-                ),
+                decoration: c.cardBox(radius: Radii.card),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

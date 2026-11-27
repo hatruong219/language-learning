@@ -1,86 +1,10 @@
 import 'package:flutter/material.dart';
 
-/// Bảng màu lấy từ 藍染 (aizome) — chàm nhuộm truyền thống Nhật.
-/// Xám ngả lạnh về phía chàm chứ không phải xám trung tính vô chủ.
-class Palette extends ThemeExtension<Palette> {
-  const Palette({
-    required this.paper,
-    required this.card,
-    required this.sunken,
-    required this.line,
-    required this.ink,
-    required this.inkSoft,
-    required this.inkFaint,
-    required this.ai,
-    required this.aiWash,
-    required this.kincha,
-    required this.kinchaWash,
-    required this.matcha,
-    required this.matchaWash,
-    required this.shu,
-    required this.shuWash,
-  });
+import 'palette.dart';
 
-  final Color paper, card, sunken, line;
-  final Color ink, inkSoft, inkFaint;
-
-  /// Chàm — màu tương tác.
-  final Color ai, aiWash;
-
-  /// Hổ phách — đánh dấu "cần học lại".
-  final Color kincha, kinchaWash;
-
-  /// Xanh trà — đúng. Đỏ chu — chưa khớp.
-  final Color matcha, matchaWash, shu, shuWash;
-
-  static const light = Palette(
-    paper: Color(0xFFF4F6FA),
-    card: Color(0xFFFFFFFF),
-    sunken: Color(0xFFE8ECF3),
-    line: Color(0xFFDCE1EB),
-    ink: Color(0xFF14171D),
-    inkSoft: Color(0xFF4A5163),
-    inkFaint: Color(0xFF878FA3),
-    ai: Color(0xFF2D5BA9),
-    aiWash: Color(0xFFE7EDF9),
-    kincha: Color(0xFFB0791A),
-    kinchaWash: Color(0xFFFBF0DA),
-    matcha: Color(0xFF1B7A44),
-    matchaWash: Color(0xFFE2F3E8),
-    shu: Color(0xFFB93A29),
-    shuWash: Color(0xFFFBE7E4),
-  );
-
-  static const dark = Palette(
-    paper: Color(0xFF0F1116),
-    card: Color(0xFF191D25),
-    sunken: Color(0xFF232833),
-    line: Color(0xFF2E3542),
-    ink: Color(0xFFEDEFF4),
-    inkSoft: Color(0xFFAEB6C6),
-    inkFaint: Color(0xFF737C8F),
-    ai: Color(0xFF7AA5EC),
-    aiWash: Color(0xFF1B2740),
-    kincha: Color(0xFFDFA83E),
-    kinchaWash: Color(0xFF2E2717),
-    matcha: Color(0xFF4FBF80),
-    matchaWash: Color(0xFF14291D),
-    shu: Color(0xFFE8705C),
-    shuWash: Color(0xFF2C1917),
-  );
-
-  @override
-  Palette copyWith() => this;
-
-  @override
-  Palette lerp(ThemeExtension<Palette>? other, double t) =>
-      t < 0.5 ? this : (other as Palette? ?? this);
-}
-
-/// Lấy bảng màu ở bất kỳ đâu trong cây widget.
-extension PaletteOf on BuildContext {
-  Palette get c => Theme.of(this).extension<Palette>()!;
-}
+// Bảng màu + bán kính tách sang palette.dart cho file này gọn; export lại để
+// mọi chỗ đang import theme.dart không phải sửa.
+export 'palette.dart';
 
 /// Style do widget đặt RIÊNG (textStyle/labelStyle/titleTextStyle…) THAY chứ
 /// không gộp với theme, nên mất family → engine rơi về 'Roboto' không có kana
@@ -110,6 +34,19 @@ ThemeData buildTheme(Brightness brightness) {
     textTheme: base.textTheme.apply(bodyColor: p.ink, displayColor: p.ink),
     dividerColor: p.line,
     splashFactory: InkSparkle.splashFactory,
+    // iOS/macOS giữ kiểu Cupertino (vuốt mép trái để quay lại — người dùng
+    // iPhone quen tay). Nơi khác dùng mờ-trượt nhẹ thay vì phóng to kiểu
+    // Android cũ, nhìn liền mạch hơn trên web.
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+        TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+        TargetPlatform.linux: FadeForwardsPageTransitionsBuilder(),
+        TargetPlatform.windows: FadeForwardsPageTransitionsBuilder(),
+        TargetPlatform.fuchsia: FadeForwardsPageTransitionsBuilder(),
+      },
+    ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: p.card,
       selectedItemColor: p.ai,
@@ -146,16 +83,70 @@ ThemeData buildTheme(Brightness brightness) {
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         backgroundColor: p.ai,
-        foregroundColor: Colors.white,
-        minimumSize: const Size.fromHeight(50),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        foregroundColor: p.onAi,
+        disabledBackgroundColor: p.sunken,
+        disabledForegroundColor: p.inkFaint,
+        minimumSize: const Size.fromHeight(52),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Radii.control + 2),
+        ),
         textStyle: const TextStyle(
           fontFamily: bundledFontFamily,
           fontFamilyFallback: bundledFontFallback,
           fontSize: 16,
           fontWeight: FontWeight.w600,
+          letterSpacing: 0.1,
         ),
       ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: p.inkSoft,
+        backgroundColor: p.card,
+        side: BorderSide(color: p.line),
+        minimumSize: const Size.fromHeight(46),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Radii.control),
+        ),
+        textStyle: const TextStyle(
+          fontFamily: bundledFontFamily,
+          fontFamilyFallback: bundledFontFallback,
+          fontSize: 14.5,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Radii.control),
+        ),
+        textStyle: const TextStyle(
+          fontFamily: bundledFontFamily,
+          fontFamilyFallback: bundledFontFallback,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: p.card,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Radii.sheet),
+      ),
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: p.card,
+      surfaceTintColor: Colors.transparent,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(Radii.sheet)),
+      ),
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: p.ai,
+      linearTrackColor: p.sunken,
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
@@ -165,7 +156,11 @@ ThemeData buildTheme(Brightness brightness) {
         fontFamilyFallback: bundledFontFallback,
         color: p.paper,
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(Radii.control),
+      ),
+      elevation: 0,
+      insetPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
     ),
   );
 }

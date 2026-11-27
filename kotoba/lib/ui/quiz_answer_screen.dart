@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../app_scope.dart';
 import '../quiz/quiz_session.dart';
 import '../theme.dart';
+import 'motion.dart';
+import 'quiz_progress_bar.dart';
+import 'quiz_screen_parts.dart';
 import 'quiz_speak_panel.dart';
 import 'quiz_verdict_panel.dart';
 import 'quiz_write_panel.dart';
@@ -110,7 +113,7 @@ class _QuizAnswerScreenState extends State<QuizAnswerScreen> {
           if (!_showingVerdict)
             Padding(
               padding: const EdgeInsets.only(right: 12),
-              child: _ModeSwitch(
+              child: ModeToggle(
                 mode: _s.mode,
                 onChanged: (m) {
                   _s.mode = m;
@@ -130,21 +133,27 @@ class _QuizAnswerScreenState extends State<QuizAnswerScreen> {
             18,
             MediaQuery.of(context).viewInsets.bottom + 24,
           ),
-          child: _showingVerdict
-              ? QuizVerdictPanel(item: item, onNext: _next, onClose: _leave)
-              : _s.mode == QuizMode.write
-              ? WritePanel(
-                  item: item,
-                  controller: _input,
-                  onSubmit: _check,
-                  onSkip: _skip,
-                )
-              : QuizSpeakPanel(
-                  item: item,
-                  onSubmit: _check,
-                  onSkip: _skip,
-                  onSwitchToWrite: () => _s.mode = QuizMode.write,
-                ),
+          // Mỗi câu mới / mỗi lần chấm là một khoá mới → khối nội dung hiện ra
+          // lại từ đầu (mờ + trượt), người học cảm được "đã sang bước khác".
+          child: EnterFadeSlide(
+            key: ValueKey('${item.word.id}|$_showingVerdict|${_s.mode}'),
+            fromScale: _showingVerdict ? 0.97 : 1,
+            child: _showingVerdict
+                ? QuizVerdictPanel(item: item, onNext: _next, onClose: _leave)
+                : _s.mode == QuizMode.write
+                ? WritePanel(
+                    item: item,
+                    controller: _input,
+                    onSubmit: _check,
+                    onSkip: _skip,
+                  )
+                : QuizSpeakPanel(
+                    item: item,
+                    onSubmit: _check,
+                    onSkip: _skip,
+                    onSwitchToWrite: () => _s.mode = QuizMode.write,
+                  ),
+          ),
         ),
       ),
       backgroundColor: c.paper,
@@ -162,85 +171,38 @@ class _Progress extends StatelessWidget {
     final c = context.c;
     final done = session.answeredCount;
     final total = session.total;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          '$done / $total',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: c.ink,
-          ),
-        ),
-        const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(2),
-          child: LinearProgressIndicator(
-            value: total == 0 ? 0 : done / total,
-            minHeight: 3,
-            backgroundColor: c.sunken,
-            valueColor: AlwaysStoppedAnimation(c.ai),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ModeSwitch extends StatelessWidget {
-  const _ModeSwitch({required this.mode, required this.onChanged});
-
-  final QuizMode mode;
-  final ValueChanged<QuizMode> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.c;
-    return Container(
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        color: c.sunken,
-        borderRadius: BorderRadius.circular(9),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+    // Chừa lề phải: lúc chấm điểm không còn nút Viết/Đọc, vạch kéo sát mép
+    // màn hình trông như bị cắt.
+    return Padding(
+      padding: const EdgeInsets.only(right: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _seg(
-            c,
-            'Viết',
-            mode == QuizMode.write,
-            () => onChanged(QuizMode.write),
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(text: '$done'),
+                TextSpan(
+                  text: ' / $total',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: c.inkFaint,
+                  ),
+                ),
+              ],
+            ),
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: c.ink,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
           ),
-          _seg(
-            c,
-            'Đọc',
-            mode == QuizMode.speak,
-            () => onChanged(QuizMode.speak),
-          ),
+          const SizedBox(height: 6),
+          ProgressTrack(done: done, total: total, height: 5),
         ],
       ),
     );
   }
-
-  Widget _seg(Palette c, String label, bool on, VoidCallback onTap) =>
-      GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
-          decoration: BoxDecoration(
-            color: on ? c.card : Colors.transparent,
-            borderRadius: BorderRadius.circular(7),
-          ),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: on ? FontWeight.w600 : FontWeight.w500,
-              color: on ? c.ink : c.inkSoft,
-            ),
-          ),
-        ),
-      );
 }

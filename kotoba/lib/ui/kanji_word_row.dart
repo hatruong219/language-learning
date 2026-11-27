@@ -30,11 +30,7 @@ class KanjiWordRow extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.fromLTRB(14, 0, 14, 8),
       padding: const EdgeInsets.fromLTRB(12, 10, 4, 10),
-      decoration: BoxDecoration(
-        color: c.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: c.line),
-      ),
+      decoration: c.cardBox(radius: Radii.row),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../quiz/quiz_session.dart';
 import '../theme.dart';
+import 'glyph_badge.dart';
+import 'motion.dart';
 
 /// Thanh đổi chế độ Viết/Đọc và màn mời chọn bài. Tách khỏi `quiz_screen.dart`
 /// để file đó chỉ còn phần điều phối phiên học.
@@ -16,22 +18,22 @@ class ModeToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.c;
     return Container(
-      padding: const EdgeInsets.all(2),
+      padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: c.sunken,
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           _seg(
-            c,
+            context,
             'Viết',
             mode == QuizMode.write,
             () => onChanged(QuizMode.write),
           ),
           _seg(
-            c,
+            context,
             'Đọc',
             mode == QuizMode.speak,
             () => onChanged(QuizMode.speak),
@@ -41,14 +43,19 @@ class ModeToggle extends StatelessWidget {
     );
   }
 
-  Widget _seg(Palette c, String label, bool on, VoidCallback onTap) =>
-      GestureDetector(
+  Widget _seg(BuildContext context, String label, bool on, VoidCallback onTap) {
+    final c = context.c;
+    return Pressable(
+      child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+        child: AnimatedContainer(
+          duration: Motion.of(context, Motion.quick),
+          curve: Motion.ease,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: on ? c.card : Colors.transparent,
-            borderRadius: BorderRadius.circular(7),
+            color: on ? c.card : c.card.withValues(alpha: 0),
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: on ? c.raise : const [],
           ),
           child: Text(
             label,
@@ -59,7 +66,9 @@ class ModeToggle extends StatelessWidget {
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class QuizIntro extends StatelessWidget {
@@ -84,37 +93,36 @@ class QuizIntro extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.all(30),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '学',
-                style: TextStyle(fontSize: 52, height: 1, color: c.line),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Chọn bài để bắt đầu',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: c.ink,
+          child: EnterFadeSlide(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const GlyphBadge('学'),
+                const SizedBox(height: 22),
+                Text(
+                  'Chọn bài để bắt đầu',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: c.ink,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Chọn một hoặc nhiều bài. Xem nghĩa tiếng Việt, '
-                'nhập hoặc đọc từ tiếng Nhật.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14.5,
-                  height: 1.5,
-                  color: c.inkFaint,
+                const SizedBox(height: 8),
+                Text(
+                  'Chọn một hoặc nhiều bài. Xem nghĩa tiếng Việt, '
+                  'nhập hoặc đọc từ tiếng Nhật.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    height: 1.5,
+                    color: c.inkFaint,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 22),
-              FilledButton(onPressed: onPick, child: const Text('Chọn bài')),
-            ],
+                const SizedBox(height: 22),
+                FilledButton(onPressed: onPick, child: const Text('Chọn bài')),
+              ],
+            ),
           ),
         ),
       ),

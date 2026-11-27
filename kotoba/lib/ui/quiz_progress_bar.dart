@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
+import 'motion.dart';
 
 /// Thanh tiến độ trên đầu một phiên làm bài, kèm nút dừng.
 ///
@@ -41,16 +42,8 @@ class QuizProgressBar extends StatelessWidget {
                     color: c.inkSoft,
                   ),
                 ),
-                const SizedBox(height: 5),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: total == 0 ? 0 : done / total,
-                    minHeight: 4,
-                    backgroundColor: c.sunken,
-                    valueColor: AlwaysStoppedAnimation(c.ai),
-                  ),
-                ),
+                const SizedBox(height: 6),
+                ProgressTrack(done: done, total: total),
               ],
             ),
           ),
@@ -60,6 +53,43 @@ class QuizProgressBar extends StatelessWidget {
             tooltip: 'Dừng phiên',
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Vạch tiến độ bo tròn, trượt mượt tới giá trị mới thay vì nhảy cóc.
+///
+/// Dùng chung cho thanh trên đầu phiên và tiêu đề màn trả lời.
+class ProgressTrack extends StatelessWidget {
+  const ProgressTrack({
+    super.key,
+    required this.done,
+    required this.total,
+    this.height = 6,
+  });
+
+  final int done;
+  final int total;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    final target = total == 0 ? 0.0 : (done / total).clamp(0.0, 1.0);
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(height),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(end: target),
+        duration: Motion.of(context, Motion.progress),
+        curve: Motion.ease,
+        builder: (context, v, _) => LinearProgressIndicator(
+          value: v,
+          minHeight: height,
+          backgroundColor: c.sunken,
+          valueColor: AlwaysStoppedAnimation(c.ai),
+          borderRadius: BorderRadius.circular(height),
+        ),
       ),
     );
   }
@@ -83,20 +113,33 @@ class QuizChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: on ? c.ai : c.sunken,
-          borderRadius: BorderRadius.circular(9),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13.5,
-            fontWeight: FontWeight.w600,
-            color: on ? Colors.white : c.inkSoft,
+    return Pressable(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: Motion.of(context, Motion.quick),
+          curve: Motion.ease,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: on ? c.ai : c.sunken,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: on
+                ? [
+                    BoxShadow(
+                      color: c.ai.withValues(alpha: 0.28),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : const [],
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: on ? c.onAi : c.inkSoft,
+            ),
           ),
         ),
       ),

@@ -116,7 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () => _revealAll.value = !all,
                   style: TextButton.styleFrom(
                     backgroundColor: all ? c.ai : c.aiWash,
-                    foregroundColor: all ? Colors.white : c.ai,
+                    foregroundColor: all ? c.onAi : c.ai,
                     shape: const StadiumBorder(),
                     visualDensity: VisualDensity.compact,
                   ),

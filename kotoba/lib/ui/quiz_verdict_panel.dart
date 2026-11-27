@@ -4,6 +4,7 @@ import '../app_scope.dart';
 import '../data/vocabulary.dart';
 import '../quiz/quiz_session.dart';
 import '../theme.dart';
+import 'quiz_verdict_mark.dart';
 
 /// Màn chấm điểm.
 ///
@@ -34,20 +35,25 @@ class QuizVerdictPanel extends StatelessWidget {
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
           decoration: BoxDecoration(
             color: ok ? c.matchaWash : c.shuWash,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(Radii.card + 4),
+            border: Border.all(
+              color: (ok ? c.matcha : c.shu).withValues(alpha: 0.18),
+            ),
           ),
           child: Column(
             children: [
+              VerdictMark(ok: ok),
+              const SizedBox(height: 10),
               Text(
                 // "Chưa khớp" chứ không phải "Sai" — nhẹ hơn, và đúng hơn về
                 // mặt sự việc: đó chỉ là hai chuỗi không trùng nhau.
                 ok ? 'ĐÚNG' : 'CHƯA KHỚP',
                 style: TextStyle(
-                  fontSize: 11,
-                  letterSpacing: 1.4,
+                  fontSize: 11.5,
+                  letterSpacing: 1.6,
                   fontWeight: FontWeight.w700,
                   color: ok ? c.matcha : c.shu,
                 ),
@@ -57,7 +63,8 @@ class QuizVerdictPanel extends StatelessWidget {
                 word.reading,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 32,
+                  fontSize: 34,
+                  height: 1.2,
                   fontWeight: FontWeight.w600,
                   color: c.ink,
                 ),
@@ -110,14 +117,6 @@ class QuizVerdictPanel extends StatelessWidget {
                 ),
                 icon: const Icon(Icons.volume_up_rounded, size: 18),
                 label: Text(ok ? 'Nghe lại' : 'Nghe mẫu'),
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(46),
-                  side: BorderSide(color: c.line),
-                  foregroundColor: c.inkSoft,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
               ),
             ),
           ],
@@ -171,7 +170,9 @@ class _StarButton extends StatelessWidget {
         label: Text(starred ? 'Đã đánh dấu' : 'Cần học lại'),
         style: FilledButton.styleFrom(
           backgroundColor: starred ? c.kincha : c.kinchaWash,
-          foregroundColor: starred ? Colors.white : c.kincha,
+          // onAi chứ không trắng trần: nền tối dùng hổ phách sáng, chữ trắng
+          // trên đó không đọc nổi. onAi đậm ở nền tối, trắng ở nền sáng.
+          foregroundColor: starred ? c.onAi : c.kincha,
           minimumSize: const Size.fromHeight(46),
           textStyle: const TextStyle(
             fontFamily: bundledFontFamily,
